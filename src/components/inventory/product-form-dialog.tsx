@@ -43,7 +43,7 @@ export function ProductFormDialog({
   dict: Dictionary;
   categories: Category[];
   product?: ExistingProduct;
-  trigger: React.ReactNode;
+  trigger: React.ReactElement;
 }) {
   const isEdit = !!product;
   const [open, setOpen] = useState(false);

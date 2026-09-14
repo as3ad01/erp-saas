@@ -1,12 +1,13 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { syncUserAndConsumeAuthorization } from "@/lib/user-sync";
+import type { NextRequest } from "next/server";
 
 // Fast path for syncing new Clerk users + consuming their AuthorizedSignup
 // allowlist entry. getSessionContext() has a lazy fallback that does the same
 // sync on-demand, so this endpoint is an optimization, not a hard dependency --
 // the app stays correct even if this webhook is never configured (e.g. local
 // dev, where Clerk can't reach localhost) or delivery lags.
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   let evt;
   try {
     evt = await verifyWebhook(req);

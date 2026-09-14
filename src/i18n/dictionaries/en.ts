@@ -366,7 +366,7 @@ const en = {
       deleting: "Deleting...",
     },
   },
-} as const;
+};
 
 export default en;
 export type Dictionary = typeof en;
