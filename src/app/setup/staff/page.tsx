@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { inviteStaffMember } from "@/lib/actions/staff";
 import { completeSetup } from "@/lib/actions/setup";
 import { ActionForm } from "@/components/ui/action-form";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,37 +41,31 @@ export default async function SetupStaffPage() {
           errorMessage={dict.common.somethingWentWrong}
           className="flex flex-wrap items-end gap-4"
         >
-          {(isPending) => (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="staffEmail">{dict.common.email}</Label>
-                <Input
-                  id="staffEmail"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="staff@example.com"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="staffRole">{dict.common.role}</Label>
-                <Select name="role" defaultValue="CASHIER">
-                  <SelectTrigger id="staffRole" className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CASHIER">{dict.roles.CASHIER}</SelectItem>
-                    <SelectItem value="MANAGER">{dict.roles.MANAGER}</SelectItem>
-                    <SelectItem value="ACCOUNTANT">{dict.roles.ACCOUNTANT}</SelectItem>
-                    <SelectItem value="COMPANY_ADMIN">{dict.roles.COMPANY_ADMIN}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" variant="outline" disabled={isPending}>
-                {dict.common.add}
-              </Button>
-            </>
-          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="staffEmail">{dict.common.email}</Label>
+            <Input
+              id="staffEmail"
+              name="email"
+              type="email"
+              required
+              placeholder="staff@example.com"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="staffRole">{dict.common.role}</Label>
+            <Select name="role" defaultValue="CASHIER">
+              <SelectTrigger id="staffRole" className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CASHIER">{dict.roles.CASHIER}</SelectItem>
+                <SelectItem value="MANAGER">{dict.roles.MANAGER}</SelectItem>
+                <SelectItem value="ACCOUNTANT">{dict.roles.ACCOUNTANT}</SelectItem>
+                <SelectItem value="COMPANY_ADMIN">{dict.roles.COMPANY_ADMIN}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <SubmitButton variant="outline">{dict.common.add}</SubmitButton>
         </ActionForm>
 
         {pending.length > 0 && (

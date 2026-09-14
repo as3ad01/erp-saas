@@ -1,7 +1,17 @@
 "use client";
 
-import { useRef, useTransition } from "react";
+import { createContext, useContext, useRef, useTransition } from "react";
 import { toast } from "sonner";
+
+// isPending has to reach the submit button via context rather than a
+// children(isPending) render-prop: these forms are rendered from Server
+// Component pages, and a closure passed as a prop across the server/client
+// boundary isn't serializable -- only plain JSX and Server Actions are.
+const PendingContext = createContext(false);
+
+export function useActionFormPending() {
+  return useContext(PendingContext);
+}
 
 // A drop-in replacement for <form action={serverAction}> that adds toast
 // feedback. Only use this for actions that don't call redirect() on their
@@ -27,7 +37,7 @@ export function ActionForm({
   resetOnSuccess?: boolean;
   onSuccess?: () => void;
   className?: string;
-  children: (isPending: boolean) => React.ReactNode;
+  children: React.ReactNode;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -49,7 +59,7 @@ export function ActionForm({
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className={className}>
-      {children(isPending)}
+      <PendingContext.Provider value={isPending}>{children}</PendingContext.Provider>
     </form>
   );
 }

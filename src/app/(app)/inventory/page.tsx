@@ -5,6 +5,7 @@ import { ProductFormDialog } from "@/components/inventory/product-form-dialog";
 import { AdjustStockDialog } from "@/components/inventory/adjust-stock-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { ActionForm } from "@/components/ui/action-form";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,19 +96,13 @@ export default async function InventoryPage({
               errorMessage={dict.common.somethingWentWrong}
               className="flex items-end gap-2"
             >
-              {(isPending) => (
-                <>
-                  <Input
-                    name="name"
-                    placeholder={dict.inventory.categories.addPlaceholder}
-                    className="max-w-xs"
-                    required
-                  />
-                  <Button type="submit" variant="outline" disabled={isPending}>
-                    {dict.common.add}
-                  </Button>
-                </>
-              )}
+              <Input
+                name="name"
+                placeholder={dict.inventory.categories.addPlaceholder}
+                className="max-w-xs"
+                required
+              />
+              <SubmitButton variant="outline">{dict.common.add}</SubmitButton>
             </ActionForm>
           </CardContent>
         </Card>
@@ -204,11 +199,9 @@ export default async function InventoryPage({
                             errorMessage={dict.common.somethingWentWrong}
                             resetOnSuccess={false}
                           >
-                            {(isPending) => (
-                              <Button type="submit" variant="outline" size="sm" disabled={isPending}>
-                                {p.isActive ? dict.inventory.deactivate : dict.inventory.activate}
-                              </Button>
-                            )}
+                            <SubmitButton variant="outline" size="sm">
+                              {p.isActive ? dict.inventory.deactivate : dict.inventory.activate}
+                            </SubmitButton>
                           </ActionForm>
                         </div>
                       </TableCell>
