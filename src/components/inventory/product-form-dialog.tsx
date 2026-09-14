@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { createProduct, updateProduct } from "@/lib/actions/inventory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,12 +57,10 @@ export function ProductFormDialog({
     String(product?.lowStockThreshold ?? 5)
   );
   const [initialStock, setInitialStock] = useState("0");
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       try {
         const base = {
@@ -74,12 +73,14 @@ export function ProductFormDialog({
         };
         if (isEdit) {
           await updateProduct(product.id, base);
+          toast.success(dict.toasts.productUpdated);
         } else {
           await createProduct({ ...base, initialStock: Number(initialStock) });
+          toast.success(dict.toasts.productAdded);
         }
         setOpen(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -169,7 +170,6 @@ export function ProductFormDialog({
               </div>
             )}
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-fit">
             {isPending ? dict.common.saving : dict.common.save}
           </Button>

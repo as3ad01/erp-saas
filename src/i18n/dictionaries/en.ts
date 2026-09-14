@@ -391,6 +391,28 @@ const en = {
       deleting: "Deleting...",
     },
   },
+  toasts: {
+    productAdded: "Product added",
+    productUpdated: "Product updated",
+    stockAdjusted: "Stock adjusted",
+    categoryAdded: "Category added",
+    productActivated: "Product activated",
+    productDeactivated: "Product deactivated",
+    customerAdded: "Customer added",
+    saleRefunded: "Sale refunded",
+    supplierAdded: "Supplier added",
+    purchaseOrderCreated: "Purchase order created",
+    orderReceived: "Order marked as received",
+    orderCanceled: "Order canceled",
+    expenseAdded: "Expense added",
+    clientAdded: "Client added",
+    companyStatusUpdated: "Company status updated",
+    signupEmailUpdated: "Email updated",
+    companyDeleted: "Company deleted",
+    companyProfileUpdated: "Company profile updated",
+    modulesUpdated: "Modules updated",
+    staffInvited: "Staff member invited",
+  },
 };
 
 export default en;

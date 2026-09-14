@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { adjustStock } from "@/lib/actions/inventory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,32 +29,25 @@ export function AdjustStockDialog({
   const [open, setOpen] = useState(false);
   const [quantityChange, setQuantityChange] = useState("");
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       try {
         await adjustStock({ productId, quantityChange: Number(quantityChange), reason });
+        toast.success(dict.toasts.stockAdjusted);
         setOpen(false);
         setQuantityChange("");
         setReason("");
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (!next) setError(null);
-      }}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           <Button variant="outline" size="sm">
@@ -87,7 +81,6 @@ export function AdjustStockDialog({
             <Label htmlFor="adjust-reason">{dict.inventory.adjustStock.reason}</Label>
             <Input id="adjust-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-fit">
             {isPending ? dict.common.saving : dict.common.save}
           </Button>

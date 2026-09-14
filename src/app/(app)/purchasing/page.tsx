@@ -6,6 +6,7 @@ import { ReceiveOrderDialog } from "@/components/purchasing/receive-order-dialog
 import { CancelOrderDialog } from "@/components/purchasing/cancel-order-dialog";
 import { PurchaseOrderDetailDialog } from "@/components/purchasing/purchase-order-detail-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { ActionForm } from "@/components/ui/action-form";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -178,28 +179,37 @@ export default async function PurchasingPage({
             </CardHeader>
             <CardContent className="space-y-4">
               {canManage && (
-                <form action={createSupplier} className="flex flex-wrap items-end gap-2">
-                  <Input
-                    name="name"
-                    placeholder={dict.purchasing.suppliers.addName}
-                    className="max-w-xs"
-                    required
-                  />
-                  <Input
-                    name="phone"
-                    placeholder={dict.purchasing.suppliers.addPhone}
-                    className="max-w-xs"
-                  />
-                  <Input
-                    name="email"
-                    type="email"
-                    placeholder={dict.purchasing.suppliers.addEmail}
-                    className="max-w-xs"
-                  />
-                  <Button type="submit" variant="outline">
-                    {dict.common.add}
-                  </Button>
-                </form>
+                <ActionForm
+                  action={createSupplier}
+                  successMessage={dict.toasts.supplierAdded}
+                  errorMessage={dict.common.somethingWentWrong}
+                  className="flex flex-wrap items-end gap-2"
+                >
+                  {(isPending) => (
+                    <>
+                      <Input
+                        name="name"
+                        placeholder={dict.purchasing.suppliers.addName}
+                        className="max-w-xs"
+                        required
+                      />
+                      <Input
+                        name="phone"
+                        placeholder={dict.purchasing.suppliers.addPhone}
+                        className="max-w-xs"
+                      />
+                      <Input
+                        name="email"
+                        type="email"
+                        placeholder={dict.purchasing.suppliers.addEmail}
+                        className="max-w-xs"
+                      />
+                      <Button type="submit" variant="outline" disabled={isPending}>
+                        {dict.common.add}
+                      </Button>
+                    </>
+                  )}
+                </ActionForm>
               )}
               <Table>
                 <TableHeader>

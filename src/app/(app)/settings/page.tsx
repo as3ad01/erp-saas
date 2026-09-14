@@ -4,6 +4,7 @@ import { updateCompanyProfile } from "@/lib/actions/company";
 import { updateEnabledModules } from "@/lib/actions/modules";
 import { inviteStaffMember } from "@/lib/actions/staff";
 import { AccountSecurityButton } from "@/components/settings/account-security-button";
+import { ActionForm } from "@/components/ui/action-form";
 import { ALL_MODULES, moduleInfo } from "@/lib/modules";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -64,40 +65,53 @@ export default async function SettingsPage() {
           <CardTitle>{dict.settings.profile.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             key={`${company.name}-${company.currency}-${company.address ?? ""}`}
             action={updateCompanyProfile}
+            successMessage={dict.toasts.companyProfileUpdated}
+            errorMessage={dict.common.somethingWentWrong}
+            resetOnSuccess={false}
             className="grid max-w-lg gap-4"
           >
-            <div className="space-y-1.5">
-              <Label htmlFor="name">{dict.common.companyName}</Label>
-              <Input id="name" name="name" defaultValue={company.name} disabled={!isAdmin} required />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="currency">{dict.common.currency}</Label>
-              <Input
-                id="currency"
-                name="currency"
-                defaultValue={company.currency}
-                disabled={!isAdmin}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="address">{dict.common.address}</Label>
-              <Input
-                id="address"
-                name="address"
-                defaultValue={company.address ?? ""}
-                disabled={!isAdmin}
-              />
-            </div>
-            {isAdmin && (
-              <Button type="submit" className="w-fit">
-                {dict.common.save}
-              </Button>
+            {(isPending) => (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name">{dict.common.companyName}</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    defaultValue={company.name}
+                    disabled={!isAdmin}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="currency">{dict.common.currency}</Label>
+                  <Input
+                    id="currency"
+                    name="currency"
+                    defaultValue={company.currency}
+                    disabled={!isAdmin}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="address">{dict.common.address}</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    defaultValue={company.address ?? ""}
+                    disabled={!isAdmin}
+                  />
+                </div>
+                {isAdmin && (
+                  <Button type="submit" className="w-fit" disabled={isPending}>
+                    {dict.common.save}
+                  </Button>
+                )}
+              </>
             )}
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 
@@ -107,36 +121,43 @@ export default async function SettingsPage() {
           <CardDescription>{dict.settings.modules.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
+          <ActionForm
             key={company.enabledModules.slice().sort().join(",")}
             action={updateEnabledModules}
+            successMessage={dict.toasts.modulesUpdated}
+            errorMessage={dict.common.somethingWentWrong}
+            resetOnSuccess={false}
             className="grid max-w-lg gap-3"
           >
-            {ALL_MODULES.map((mod) => (
-              <Label
-                key={mod}
-                htmlFor={`settings-module-${mod}`}
-                className="flex items-start gap-3 rounded-lg border border-input p-3 has-data-checked:border-primary"
-              >
-                <Checkbox
-                  id={`settings-module-${mod}`}
-                  name="modules"
-                  value={mod}
-                  defaultChecked={company.enabledModules.includes(mod)}
-                  disabled={!isAdmin}
-                />
-                <span className="grid gap-0.5">
-                  <span className="text-sm font-medium">{info[mod].label}</span>
-                  <span className="text-sm text-muted-foreground">{info[mod].description}</span>
-                </span>
-              </Label>
-            ))}
-            {isAdmin && (
-              <Button type="submit" className="w-fit">
-                {dict.common.save}
-              </Button>
+            {(isPending) => (
+              <>
+                {ALL_MODULES.map((mod) => (
+                  <Label
+                    key={mod}
+                    htmlFor={`settings-module-${mod}`}
+                    className="flex items-start gap-3 rounded-lg border border-input p-3 has-data-checked:border-primary"
+                  >
+                    <Checkbox
+                      id={`settings-module-${mod}`}
+                      name="modules"
+                      value={mod}
+                      defaultChecked={company.enabledModules.includes(mod)}
+                      disabled={!isAdmin}
+                    />
+                    <span className="grid gap-0.5">
+                      <span className="text-sm font-medium">{info[mod].label}</span>
+                      <span className="text-sm text-muted-foreground">{info[mod].description}</span>
+                    </span>
+                  </Label>
+                ))}
+                {isAdmin && (
+                  <Button type="submit" className="w-fit" disabled={isPending}>
+                    {dict.common.save}
+                  </Button>
+                )}
+              </>
             )}
-          </form>
+          </ActionForm>
         </CardContent>
       </Card>
 
@@ -147,33 +168,44 @@ export default async function SettingsPage() {
             <CardDescription>{dict.settings.addStaff.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={inviteStaffMember} className="flex flex-wrap items-end gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="staffEmail">{dict.common.email}</Label>
-                <Input
-                  id="staffEmail"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="staff@example.com"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="staffRole">{dict.common.role}</Label>
-                <Select name="role" defaultValue="CASHIER">
-                  <SelectTrigger id="staffRole" className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CASHIER">{dict.roles.CASHIER}</SelectItem>
-                    <SelectItem value="MANAGER">{dict.roles.MANAGER}</SelectItem>
-                    <SelectItem value="ACCOUNTANT">{dict.roles.ACCOUNTANT}</SelectItem>
-                    <SelectItem value="COMPANY_ADMIN">{dict.roles.COMPANY_ADMIN}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit">{dict.common.add}</Button>
-            </form>
+            <ActionForm
+              action={inviteStaffMember}
+              successMessage={dict.toasts.staffInvited}
+              errorMessage={dict.common.somethingWentWrong}
+              className="flex flex-wrap items-end gap-4"
+            >
+              {(isPending) => (
+                <>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="staffEmail">{dict.common.email}</Label>
+                    <Input
+                      id="staffEmail"
+                      name="email"
+                      type="email"
+                      required
+                      placeholder="staff@example.com"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="staffRole">{dict.common.role}</Label>
+                    <Select name="role" defaultValue="CASHIER">
+                      <SelectTrigger id="staffRole" className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CASHIER">{dict.roles.CASHIER}</SelectItem>
+                        <SelectItem value="MANAGER">{dict.roles.MANAGER}</SelectItem>
+                        <SelectItem value="ACCOUNTANT">{dict.roles.ACCOUNTANT}</SelectItem>
+                        <SelectItem value="COMPANY_ADMIN">{dict.roles.COMPANY_ADMIN}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button type="submit" disabled={isPending}>
+                    {dict.common.add}
+                  </Button>
+                </>
+              )}
+            </ActionForm>
           </CardContent>
         </Card>
       )}

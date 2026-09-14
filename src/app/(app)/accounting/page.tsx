@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireCompanyContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { addManualExpense } from "@/lib/actions/accounting";
+import { ActionForm } from "@/components/ui/action-form";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,45 +113,56 @@ export default async function AccountingPage({
           <CardTitle>{dict.accounting.addExpense.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={addManualExpense} className="flex flex-wrap items-end gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="category">{dict.accounting.addExpense.category}</Label>
-              <Input
-                id="category"
-                name="category"
-                placeholder={dict.accounting.addExpense.categoryPlaceholder}
-                className="max-w-[180px]"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="amount">{dict.accounting.addExpense.amount}</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                className="max-w-[140px]"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="date">{dict.accounting.addExpense.date}</Label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-                defaultValue={toDateInputValue(today)}
-                className="max-w-[160px]"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="description">{dict.accounting.addExpense.description}</Label>
-              <Input id="description" name="description" className="max-w-xs" />
-            </div>
-            <Button type="submit">{dict.common.add}</Button>
-          </form>
+          <ActionForm
+            action={addManualExpense}
+            successMessage={dict.toasts.expenseAdded}
+            errorMessage={dict.common.somethingWentWrong}
+            className="flex flex-wrap items-end gap-3"
+          >
+            {(isPending) => (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="category">{dict.accounting.addExpense.category}</Label>
+                  <Input
+                    id="category"
+                    name="category"
+                    placeholder={dict.accounting.addExpense.categoryPlaceholder}
+                    className="max-w-[180px]"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="amount">{dict.accounting.addExpense.amount}</Label>
+                  <Input
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    className="max-w-[140px]"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="date">{dict.accounting.addExpense.date}</Label>
+                  <Input
+                    id="date"
+                    name="date"
+                    type="date"
+                    defaultValue={toDateInputValue(today)}
+                    className="max-w-[160px]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="description">{dict.accounting.addExpense.description}</Label>
+                  <Input id="description" name="description" className="max-w-xs" />
+                </div>
+                <Button type="submit" disabled={isPending}>
+                  {dict.common.add}
+                </Button>
+              </>
+            )}
+          </ActionForm>
         </CardContent>
       </Card>
 

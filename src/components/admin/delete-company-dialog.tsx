@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteCompany } from "@/lib/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,8 +33,13 @@ export function DeleteCompanyDialog({
 
   function handleDelete() {
     startTransition(async () => {
-      await deleteCompany(companyId);
-      setOpen(false);
+      try {
+        await deleteCompany(companyId);
+        toast.success(dict.toasts.companyDeleted);
+        setOpen(false);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+      }
     });
   }
 

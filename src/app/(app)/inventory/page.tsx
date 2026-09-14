@@ -4,6 +4,7 @@ import { createCategory, toggleProductActive } from "@/lib/actions/inventory";
 import { ProductFormDialog } from "@/components/inventory/product-form-dialog";
 import { AdjustStockDialog } from "@/components/inventory/adjust-stock-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { ActionForm } from "@/components/ui/action-form";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,17 +89,26 @@ export default async function InventoryPage({
                 <p className="text-sm text-muted-foreground">{dict.inventory.categories.empty}</p>
               )}
             </div>
-            <form action={createCategory} className="flex items-end gap-2">
-              <Input
-                name="name"
-                placeholder={dict.inventory.categories.addPlaceholder}
-                className="max-w-xs"
-                required
-              />
-              <Button type="submit" variant="outline">
-                {dict.common.add}
-              </Button>
-            </form>
+            <ActionForm
+              action={createCategory}
+              successMessage={dict.toasts.categoryAdded}
+              errorMessage={dict.common.somethingWentWrong}
+              className="flex items-end gap-2"
+            >
+              {(isPending) => (
+                <>
+                  <Input
+                    name="name"
+                    placeholder={dict.inventory.categories.addPlaceholder}
+                    className="max-w-xs"
+                    required
+                  />
+                  <Button type="submit" variant="outline" disabled={isPending}>
+                    {dict.common.add}
+                  </Button>
+                </>
+              )}
+            </ActionForm>
           </CardContent>
         </Card>
       )}
@@ -186,11 +196,20 @@ export default async function InventoryPage({
                               </Button>
                             }
                           />
-                          <form action={toggleAction}>
-                            <Button type="submit" variant="outline" size="sm">
-                              {p.isActive ? dict.inventory.deactivate : dict.inventory.activate}
-                            </Button>
-                          </form>
+                          <ActionForm
+                            action={toggleAction}
+                            successMessage={
+                              p.isActive ? dict.toasts.productDeactivated : dict.toasts.productActivated
+                            }
+                            errorMessage={dict.common.somethingWentWrong}
+                            resetOnSuccess={false}
+                          >
+                            {(isPending) => (
+                              <Button type="submit" variant="outline" size="sm" disabled={isPending}>
+                                {p.isActive ? dict.inventory.deactivate : dict.inventory.activate}
+                              </Button>
+                            )}
+                          </ActionForm>
                         </div>
                       </TableCell>
                     )}

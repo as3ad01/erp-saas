@@ -5,6 +5,7 @@ import { POSPanel } from "@/components/sales/pos-panel";
 import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
 import { RefundSaleDialog } from "@/components/sales/refund-sale-dialog";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import { ActionForm } from "@/components/ui/action-form";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,17 +177,31 @@ export default async function SalesPage({
             </CardHeader>
             <CardContent className="space-y-4">
               {canSell && (
-                <form action={createCustomer} className="flex flex-wrap items-end gap-2">
-                  <Input name="name" placeholder={dict.sales.customers.addName} className="max-w-xs" required />
-                  <Input
-                    name="phone"
-                    placeholder={dict.sales.customers.addPhone}
-                    className="max-w-xs"
-                  />
-                  <Button type="submit" variant="outline">
-                    {dict.common.add}
-                  </Button>
-                </form>
+                <ActionForm
+                  action={createCustomer}
+                  successMessage={dict.toasts.customerAdded}
+                  errorMessage={dict.common.somethingWentWrong}
+                  className="flex flex-wrap items-end gap-2"
+                >
+                  {(isPending) => (
+                    <>
+                      <Input
+                        name="name"
+                        placeholder={dict.sales.customers.addName}
+                        className="max-w-xs"
+                        required
+                      />
+                      <Input
+                        name="phone"
+                        placeholder={dict.sales.customers.addPhone}
+                        className="max-w-xs"
+                      />
+                      <Button type="submit" variant="outline" disabled={isPending}>
+                        {dict.common.add}
+                      </Button>
+                    </>
+                  )}
+                </ActionForm>
               )}
               <Table>
                 <TableHeader>

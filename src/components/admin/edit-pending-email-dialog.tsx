@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updatePendingSignupEmail } from "@/lib/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,18 +27,17 @@ export function EditPendingEmailDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState(currentEmail);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       try {
         await updatePendingSignupEmail(authorizedSignupId, email);
+        toast.success(dict.toasts.signupEmailUpdated);
         setOpen(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -67,7 +67,6 @@ export function EditPendingEmailDialog({
               required
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={isPending} className="w-fit">
             {isPending ? dict.common.saving : dict.common.save}
           </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { receivePurchaseOrder } from "@/lib/actions/purchasing";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,17 +22,16 @@ export function ReceiveOrderDialog({
   purchaseOrderId: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleConfirm() {
-    setError(null);
     startTransition(async () => {
       try {
         await receivePurchaseOrder(purchaseOrderId);
+        toast.success(dict.toasts.orderReceived);
         setOpen(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -50,7 +50,6 @@ export function ReceiveOrderDialog({
           <DialogTitle>{dict.purchasing.receive.confirmTitle}</DialogTitle>
           <DialogDescription>{dict.purchasing.receive.confirmDescription}</DialogDescription>
         </DialogHeader>
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button disabled={isPending} onClick={handleConfirm} className="w-fit">
           {isPending ? dict.purchasing.receive.receiving : dict.purchasing.receive.confirm}
         </Button>

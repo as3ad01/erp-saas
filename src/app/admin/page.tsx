@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { createCompanyWithAdmin, toggleCompanyPause } from "@/lib/actions/admin";
 import { EditPendingEmailDialog } from "@/components/admin/edit-pending-email-dialog";
 import { DeleteCompanyDialog } from "@/components/admin/delete-company-dialog";
+import { ActionForm } from "@/components/ui/action-form";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,19 +33,30 @@ export default async function AdminPage() {
           <CardTitle>{dict.admin.addCompany.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={createCompanyWithAdmin} className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">{dict.admin.addCompany.emailLabel}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="owner@acme.com"
-              />
-            </div>
-            <Button type="submit">{dict.admin.addCompany.submit}</Button>
-          </form>
+          <ActionForm
+            action={createCompanyWithAdmin}
+            successMessage={dict.toasts.clientAdded}
+            errorMessage={dict.common.somethingWentWrong}
+            className="flex flex-wrap items-end gap-4"
+          >
+            {(isPending) => (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">{dict.admin.addCompany.emailLabel}</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="owner@acme.com"
+                  />
+                </div>
+                <Button type="submit" disabled={isPending}>
+                  {dict.admin.addCompany.submit}
+                </Button>
+              </>
+            )}
+          </ActionForm>
         </CardContent>
       </Card>
 
@@ -95,14 +107,23 @@ export default async function AdminPage() {
                             dict={dict}
                           />
                         )}
-                        <form action={toggleCompanyPause}>
-                          <input type="hidden" name="companyId" value={c.id} />
-                          <Button type="submit" variant="outline" size="sm">
-                            {c.subscriptionStatus === "ACTIVE"
-                              ? dict.admin.table.pause
-                              : dict.admin.table.reactivate}
-                          </Button>
-                        </form>
+                        <ActionForm
+                          action={toggleCompanyPause}
+                          successMessage={dict.toasts.companyStatusUpdated}
+                          errorMessage={dict.common.somethingWentWrong}
+                          resetOnSuccess={false}
+                        >
+                          {(isPending) => (
+                            <>
+                              <input type="hidden" name="companyId" value={c.id} />
+                              <Button type="submit" variant="outline" size="sm" disabled={isPending}>
+                                {c.subscriptionStatus === "ACTIVE"
+                                  ? dict.admin.table.pause
+                                  : dict.admin.table.reactivate}
+                              </Button>
+                            </>
+                          )}
+                        </ActionForm>
                         <DeleteCompanyDialog companyId={c.id} companyName={c.name} dict={dict} />
                       </div>
                     </TableCell>

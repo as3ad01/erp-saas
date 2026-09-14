@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Search, Minus, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 import { createSale } from "@/lib/actions/sales";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +55,6 @@ export function POSPanel({
   const [cart, setCart] = useState<CartLine[]>([]);
   const [customerId, setCustomerId] = useState(WALK_IN);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
-  const [error, setError] = useState<string | null>(null);
   const [completed, setCompleted] = useState<{ total: number } | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -109,7 +109,6 @@ export function POSPanel({
   }
 
   function handleCompleteSale() {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await createSale({
@@ -122,7 +121,7 @@ export function POSPanel({
         setCustomerId(WALK_IN);
         setPaymentMethod("CASH");
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -284,8 +283,6 @@ export function POSPanel({
               {currency} {total.toFixed(2)}
             </span>
           </div>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button
             className="w-full"

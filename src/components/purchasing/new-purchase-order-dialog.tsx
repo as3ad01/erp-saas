@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { createPurchaseOrder } from "@/lib/actions/purchasing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,7 +49,6 @@ export function NewPurchaseOrderDialog({
   const [supplierId, setSupplierId] = useState("");
   const [search, setSearch] = useState("");
   const [lines, setLines] = useState<Line[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const filteredProducts = useMemo(() => {
@@ -89,12 +89,10 @@ export function NewPurchaseOrderDialog({
     setSupplierId("");
     setSearch("");
     setLines([]);
-    setError(null);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       try {
         await createPurchaseOrder({
@@ -105,10 +103,11 @@ export function NewPurchaseOrderDialog({
             unitCost: l.unitCost,
           })),
         });
+        toast.success(dict.toasts.purchaseOrderCreated);
         setOpen(false);
         reset();
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -213,8 +212,6 @@ export function NewPurchaseOrderDialog({
               {currency} {total.toFixed(2)}
             </span>
           </div>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={!supplierId || lines.length === 0 || isPending}>
             {isPending ? dict.purchasing.newOrder.creating : dict.purchasing.newOrder.submit}

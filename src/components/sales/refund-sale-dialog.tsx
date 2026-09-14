@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { refundSale } from "@/lib/actions/sales";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,17 +16,16 @@ import type { Dictionary } from "@/i18n/get-dictionary";
 
 export function RefundSaleDialog({ dict, saleId }: { dict: Dictionary; saleId: string }) {
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleConfirm() {
-    setError(null);
     startTransition(async () => {
       try {
         await refundSale(saleId);
+        toast.success(dict.toasts.saleRefunded);
         setOpen(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : dict.common.somethingWentWrong);
+        toast.error(err instanceof Error ? err.message : dict.common.somethingWentWrong);
       }
     });
   }
@@ -44,7 +44,6 @@ export function RefundSaleDialog({ dict, saleId }: { dict: Dictionary; saleId: s
           <DialogTitle>{dict.sales.refund.confirmTitle}</DialogTitle>
           <DialogDescription>{dict.sales.refund.confirmDescription}</DialogDescription>
         </DialogHeader>
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <Button disabled={isPending} onClick={handleConfirm} className="w-fit">
           {isPending ? dict.sales.refund.refunding : dict.sales.refund.confirm}
         </Button>

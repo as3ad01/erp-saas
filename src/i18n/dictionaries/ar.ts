@@ -391,6 +391,28 @@ const ar: Dictionary = {
       deleting: "جارٍ الحذف...",
     },
   },
+  toasts: {
+    productAdded: "تمت إضافة المنتج",
+    productUpdated: "تم تحديث المنتج",
+    stockAdjusted: "تم تعديل المخزون",
+    categoryAdded: "تمت إضافة الفئة",
+    productActivated: "تم تفعيل المنتج",
+    productDeactivated: "تم إلغاء تفعيل المنتج",
+    customerAdded: "تمت إضافة العميل",
+    saleRefunded: "تم استرداد عملية البيع",
+    supplierAdded: "تمت إضافة المورد",
+    purchaseOrderCreated: "تم إنشاء أمر الشراء",
+    orderReceived: "تم تسجيل الأمر كمُستلم",
+    orderCanceled: "تم إلغاء الأمر",
+    expenseAdded: "تمت إضافة المصروف",
+    clientAdded: "تمت إضافة العميل",
+    companyStatusUpdated: "تم تحديث حالة الشركة",
+    signupEmailUpdated: "تم تحديث البريد الإلكتروني",
+    companyDeleted: "تم حذف الشركة",
+    companyProfileUpdated: "تم تحديث ملف الشركة",
+    modulesUpdated: "تم تحديث الوحدات",
+    staffInvited: "تمت دعوة عضو الفريق",
+  },
 };
 
 export default ar;
