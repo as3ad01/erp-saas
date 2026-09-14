@@ -147,6 +147,7 @@ enum StockMovementType {
   SALE
   PURCHASE
   ADJUSTMENT
+  REFUND
 }
 
 // Every stock in/out, so levels are always auditable/reconstructable.
@@ -247,6 +248,7 @@ enum PurchaseOrderStatus {
   DRAFT
   ORDERED
   RECEIVED
+  CANCELED
 }
 
 model PurchaseOrder {

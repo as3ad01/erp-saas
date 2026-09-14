@@ -20,6 +20,11 @@ const en = {
     currency: "Currency",
     pending: "pending",
     somethingWentWrong: "Something went wrong",
+    search: "Search",
+    clear: "Clear",
+    previous: "Previous",
+    next: "Next",
+    pageOf: "Page {page} of {totalPages}",
   },
   roles: {
     COMPANY_ADMIN: "Admin",
@@ -158,6 +163,7 @@ const en = {
       status: "Status",
       actions: "Actions",
       empty: "No products yet.",
+      searchPlaceholder: "Search by name or SKU...",
     },
     lowStockBadge: "Low stock",
     active: "Active",
@@ -215,10 +221,19 @@ const en = {
       status: "Status",
       view: "View",
       empty: "No sales yet.",
+      searchPlaceholder: "Search by customer name...",
     },
     saleStatus: {
       COMPLETED: "Completed",
       REFUNDED: "Refunded",
+    },
+    refund: {
+      trigger: "Refund",
+      confirmTitle: "Refund this sale?",
+      confirmDescription:
+        "This will return the sold items to stock and record the amount as an expense. This can't be undone.",
+      confirm: "Confirm refund",
+      refunding: "Refunding...",
     },
     saleDetail: {
       title: "Sale details",
@@ -267,11 +282,13 @@ const en = {
       received: "Received",
       actions: "Actions",
       empty: "No purchase orders yet.",
+      searchPlaceholder: "Search by supplier name...",
     },
     status: {
       DRAFT: "Draft",
       ORDERED: "Ordered",
       RECEIVED: "Received",
+      CANCELED: "Canceled",
     },
     receive: {
       trigger: "Mark as received",
@@ -280,6 +297,14 @@ const en = {
         "This will add the ordered quantities to your stock and record the expense. This can't be undone.",
       confirm: "Confirm receipt",
       receiving: "Receiving...",
+    },
+    cancel: {
+      trigger: "Cancel order",
+      confirmTitle: "Cancel this order?",
+      confirmDescription:
+        "This order hasn't been received yet, so no stock or accounting changes will be reversed. This can't be undone.",
+      confirm: "Confirm cancellation",
+      canceling: "Canceling...",
     },
     detail: {
       title: "Purchase order details",

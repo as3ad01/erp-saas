@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { createCustomer } from "@/lib/actions/sales";
 import { POSPanel } from "@/components/sales/pos-panel";
 import { SaleDetailDialog } from "@/components/sales/sale-detail-dialog";
+import { RefundSaleDialog } from "@/components/sales/refund-sale-dialog";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,31 +23,51 @@ import {
 import type { CompanyRole } from "@/generated/prisma/enums";
 
 const CAN_SELL: CompanyRole[] = ["COMPANY_ADMIN", "MANAGER", "CASHIER"];
+const CAN_REFUND: CompanyRole[] = ["COMPANY_ADMIN", "MANAGER"];
+const PAGE_SIZE = 20;
 
-export default async function SalesPage() {
+export default async function SalesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
   const { company, role } = await requireCompanyContext({ module: "SALES" });
   const dict = getDictionary(await getLocale());
   const canSell = CAN_SELL.includes(role);
+  const canRefund = CAN_REFUND.includes(role);
 
-  const [products, customers, sales] = await Promise.all([
+  const params = await searchParams;
+  const q = params.q?.trim() ?? "";
+  const page = Math.max(1, Number(params.page) || 1);
+  const initialTab = q || page > 1 ? "history" : canSell ? "pos" : "history";
+
+  const salesWhere = {
+    companyId: company.id,
+    ...(q ? { customer: { name: { contains: q, mode: "insensitive" as const } } } : {}),
+  };
+
+  const [products, customers, sales, salesCount] = await Promise.all([
     prisma.product.findMany({
       where: { companyId: company.id, isActive: true },
       orderBy: { name: "asc" },
     }),
     prisma.customer.findMany({ where: { companyId: company.id }, orderBy: { name: "asc" } }),
     prisma.sale.findMany({
-      where: { companyId: company.id },
+      where: salesWhere,
       include: { customer: true, cashier: true, items: { include: { product: true } } },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
+    prisma.sale.count({ where: salesWhere }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(salesCount / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{dict.nav.sales}</h1>
 
-      <Tabs defaultValue={canSell ? "pos" : "history"}>
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           {canSell && <TabsTrigger value="pos">{dict.sales.tabs.pos}</TabsTrigger>}
           <TabsTrigger value="history">{dict.sales.tabs.history}</TabsTrigger>
@@ -72,6 +94,17 @@ export default async function SalesPage() {
         <TabsContent value="history" className="pt-4">
           <Card>
             <CardContent className="overflow-x-auto pt-6">
+              <form className="mb-4 flex gap-2">
+                <Input
+                  name="q"
+                  defaultValue={q}
+                  placeholder={dict.sales.history.searchPlaceholder}
+                  className="max-w-xs"
+                />
+                <Button type="submit" variant="outline">
+                  {dict.common.search}
+                </Button>
+              </form>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -102,7 +135,7 @@ export default async function SalesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
                           <SaleDetailDialog
                             dict={dict}
                             currency={company.currency}
@@ -115,6 +148,9 @@ export default async function SalesPage() {
                               lineTotal: Number(item.lineTotal),
                             }))}
                           />
+                          {canRefund && sale.status !== "REFUNDED" && (
+                            <RefundSaleDialog dict={dict} saleId={sale.id} />
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -128,6 +164,7 @@ export default async function SalesPage() {
                   )}
                 </TableBody>
               </Table>
+              <PaginationControls dict={dict} page={page} totalPages={totalPages} searchParams={params} />
             </CardContent>
           </Card>
         </TabsContent>

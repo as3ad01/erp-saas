@@ -6,6 +6,9 @@ import { requireCompanyContext } from "@/lib/auth";
 import type { CompanyRole, PaymentMethod } from "@/generated/prisma/enums";
 
 const CAN_SELL: CompanyRole[] = ["COMPANY_ADMIN", "MANAGER", "CASHIER"];
+// Refunds are deliberately narrower than sales: a cashier who can ring up a
+// sale should not also be able to unilaterally reverse one (fraud control).
+const CAN_REFUND: CompanyRole[] = ["COMPANY_ADMIN", "MANAGER"];
 
 export async function createCustomer(formData: FormData) {
   const { company } = await requireCompanyContext({ module: "SALES" });
@@ -116,4 +119,59 @@ export async function createSale(input: {
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
   return result;
+}
+
+// Mirrors createSale: restores stock and writes an offsetting expense entry
+// in one transaction, so a refund stays as auditable as the original sale.
+export async function refundSale(saleId: string) {
+  const { company, role } = await requireCompanyContext({ module: "SALES" });
+  if (!CAN_REFUND.includes(role)) {
+    throw new Error("You don't have permission to refund sales");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const sale = await tx.sale.findFirst({
+      where: { id: saleId, companyId: company.id },
+      include: { items: true },
+    });
+    if (!sale) throw new Error("Sale not found");
+    if (sale.status === "REFUNDED") throw new Error("This sale was already refunded");
+
+    for (const item of sale.items) {
+      await tx.product.update({
+        where: { id: item.productId },
+        data: { stockQty: { increment: item.quantity } },
+      });
+      await tx.stockMovement.create({
+        data: {
+          companyId: company.id,
+          productId: item.productId,
+          type: "REFUND",
+          quantityChange: item.quantity,
+          referenceType: "Sale",
+          referenceId: sale.id,
+        },
+      });
+    }
+
+    await tx.ledgerEntry.create({
+      data: {
+        companyId: company.id,
+        type: "EXPENSE",
+        category: "Refunds",
+        amount: sale.total,
+        referenceType: "Sale",
+        referenceId: sale.id,
+      },
+    });
+
+    await tx.sale.update({
+      where: { id: sale.id },
+      data: { status: "REFUNDED" },
+    });
+  });
+
+  revalidatePath("/sales");
+  revalidatePath("/inventory");
+  revalidatePath("/dashboard");
 }

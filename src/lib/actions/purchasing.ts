@@ -140,3 +140,23 @@ export async function receivePurchaseOrder(purchaseOrderId: string) {
   revalidatePath("/inventory");
   revalidatePath("/dashboard");
 }
+
+// No inventory/accounting side effects here on purpose -- those only happen
+// at receipt time, and an ORDERED-but-not-yet-received order never touched
+// either, so canceling it is a plain status change.
+export async function cancelPurchaseOrder(purchaseOrderId: string) {
+  const { company, role } = await requireCompanyContext({ module: "PURCHASING" });
+  assertCanManage(role);
+
+  const po = await prisma.purchaseOrder.findUnique({ where: { id: purchaseOrderId } });
+  if (!po || po.companyId !== company.id) throw new Error("Purchase order not found");
+  if (po.status === "RECEIVED") throw new Error("A received order can't be canceled");
+  if (po.status === "CANCELED") throw new Error("This order was already canceled");
+
+  await prisma.purchaseOrder.update({
+    where: { id: po.id },
+    data: { status: "CANCELED" },
+  });
+
+  revalidatePath("/purchasing");
+}

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createCategory, toggleProductActive } from "@/lib/actions/inventory";
 import { ProductFormDialog } from "@/components/inventory/product-form-dialog";
 import { AdjustStockDialog } from "@/components/inventory/adjust-stock-dialog";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,19 +19,45 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function InventoryPage() {
+const PAGE_SIZE = 20;
+
+export default async function InventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
   const { company, role } = await requireCompanyContext({ module: "INVENTORY" });
   const dict = getDictionary(await getLocale());
   const canManage = role === "COMPANY_ADMIN" || role === "MANAGER";
 
-  const [products, categories] = await Promise.all([
+  const params = await searchParams;
+  const q = params.q?.trim() ?? "";
+  const page = Math.max(1, Number(params.page) || 1);
+
+  const where = {
+    companyId: company.id,
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { sku: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [products, totalCount, categories] = await Promise.all([
     prisma.product.findMany({
-      where: { companyId: company.id },
+      where,
       include: { category: true },
       orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
+    prisma.product.count({ where }),
     prisma.category.findMany({ where: { companyId: company.id }, orderBy: { name: "asc" } }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
@@ -78,6 +105,17 @@ export default async function InventoryPage() {
 
       <Card>
         <CardContent className="overflow-x-auto pt-6">
+          <form className="mb-4 flex gap-2">
+            <Input
+              name="q"
+              defaultValue={q}
+              placeholder={dict.inventory.table.searchPlaceholder}
+              className="max-w-xs"
+            />
+            <Button type="submit" variant="outline">
+              {dict.common.search}
+            </Button>
+          </form>
           <Table>
             <TableHeader>
               <TableRow>
@@ -171,6 +209,7 @@ export default async function InventoryPage() {
               )}
             </TableBody>
           </Table>
+          <PaginationControls dict={dict} page={page} totalPages={totalPages} searchParams={params} />
         </CardContent>
       </Card>
     </div>

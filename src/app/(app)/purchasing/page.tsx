@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { createSupplier } from "@/lib/actions/purchasing";
 import { NewPurchaseOrderDialog } from "@/components/purchasing/new-purchase-order-dialog";
 import { ReceiveOrderDialog } from "@/components/purchasing/receive-order-dialog";
+import { CancelOrderDialog } from "@/components/purchasing/cancel-order-dialog";
 import { PurchaseOrderDetailDialog } from "@/components/purchasing/purchase-order-detail-dialog";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,25 +24,42 @@ import {
 import type { CompanyRole } from "@/generated/prisma/enums";
 
 const CAN_MANAGE: CompanyRole[] = ["COMPANY_ADMIN", "MANAGER"];
+const PAGE_SIZE = 20;
 
-export default async function PurchasingPage() {
+export default async function PurchasingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
   const { company, role } = await requireCompanyContext({ module: "PURCHASING" });
   const dict = getDictionary(await getLocale());
   const canManage = CAN_MANAGE.includes(role);
 
-  const [suppliers, products, orders] = await Promise.all([
+  const params = await searchParams;
+  const q = params.q?.trim() ?? "";
+  const page = Math.max(1, Number(params.page) || 1);
+
+  const ordersWhere = {
+    companyId: company.id,
+    ...(q ? { supplier: { name: { contains: q, mode: "insensitive" as const } } } : {}),
+  };
+
+  const [suppliers, products, orders, ordersCount] = await Promise.all([
     prisma.supplier.findMany({ where: { companyId: company.id }, orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: { companyId: company.id, isActive: true },
       orderBy: { name: "asc" },
     }),
     prisma.purchaseOrder.findMany({
-      where: { companyId: company.id },
+      where: ordersWhere,
       include: { supplier: true, items: { include: { product: true } } },
       orderBy: { createdAt: "desc" },
-      take: 100,
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
+    prisma.purchaseOrder.count({ where: ordersWhere }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(ordersCount / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
@@ -70,6 +89,17 @@ export default async function PurchasingPage() {
           )}
           <Card>
             <CardContent className="overflow-x-auto pt-6">
+              <form className="mb-4 flex gap-2">
+                <Input
+                  name="q"
+                  defaultValue={q}
+                  placeholder={dict.purchasing.table.searchPlaceholder}
+                  className="max-w-xs"
+                />
+                <Button type="submit" variant="outline">
+                  {dict.common.search}
+                </Button>
+              </form>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -86,7 +116,15 @@ export default async function PurchasingPage() {
                     <TableRow key={po.id}>
                       <TableCell className="font-medium">{po.supplier.name}</TableCell>
                       <TableCell>
-                        <Badge variant={po.status === "RECEIVED" ? "default" : "secondary"}>
+                        <Badge
+                          variant={
+                            po.status === "RECEIVED"
+                              ? "default"
+                              : po.status === "CANCELED"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
                           {dict.purchasing.status[po.status]}
                         </Badge>
                       </TableCell>
@@ -109,8 +147,11 @@ export default async function PurchasingPage() {
                               lineTotal: Number(item.lineTotal),
                             }))}
                           />
-                          {canManage && po.status !== "RECEIVED" && (
-                            <ReceiveOrderDialog dict={dict} purchaseOrderId={po.id} />
+                          {canManage && po.status === "ORDERED" && (
+                            <>
+                              <ReceiveOrderDialog dict={dict} purchaseOrderId={po.id} />
+                              <CancelOrderDialog dict={dict} purchaseOrderId={po.id} />
+                            </>
                           )}
                         </div>
                       </TableCell>
@@ -125,6 +166,7 @@ export default async function PurchasingPage() {
                   )}
                 </TableBody>
               </Table>
+              <PaginationControls dict={dict} page={page} totalPages={totalPages} searchParams={params} />
             </CardContent>
           </Card>
         </TabsContent>

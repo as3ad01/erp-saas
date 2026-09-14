@@ -22,6 +22,11 @@ const ar: Dictionary = {
     currency: "العملة",
     pending: "قيد الانتظار",
     somethingWentWrong: "حدث خطأ ما",
+    search: "بحث",
+    clear: "مسح",
+    previous: "السابق",
+    next: "التالي",
+    pageOf: "صفحة {page} من {totalPages}",
   },
   roles: {
     COMPANY_ADMIN: "مسؤول",
@@ -158,6 +163,7 @@ const ar: Dictionary = {
       status: "الحالة",
       actions: "الإجراءات",
       empty: "لا توجد منتجات بعد.",
+      searchPlaceholder: "ابحث بالاسم أو رمز المنتج...",
     },
     lowStockBadge: "مخزون منخفض",
     active: "نشط",
@@ -215,10 +221,19 @@ const ar: Dictionary = {
       status: "الحالة",
       view: "عرض",
       empty: "لا توجد مبيعات بعد.",
+      searchPlaceholder: "ابحث باسم العميل...",
     },
     saleStatus: {
       COMPLETED: "مكتملة",
       REFUNDED: "مستردة",
+    },
+    refund: {
+      trigger: "استرداد",
+      confirmTitle: "استرداد عملية البيع هذه؟",
+      confirmDescription:
+        "سيؤدي هذا إلى إعادة العناصر المباعة إلى المخزون وتسجيل المبلغ كمصروف. لا يمكن التراجع عن هذا الإجراء.",
+      confirm: "تأكيد الاسترداد",
+      refunding: "جارٍ الاسترداد...",
     },
     saleDetail: {
       title: "تفاصيل عملية البيع",
@@ -267,11 +282,13 @@ const ar: Dictionary = {
       received: "تاريخ الاستلام",
       actions: "الإجراءات",
       empty: "لا توجد أوامر شراء بعد.",
+      searchPlaceholder: "ابحث باسم المورد...",
     },
     status: {
       DRAFT: "مسودة",
       ORDERED: "تم الطلب",
       RECEIVED: "تم الاستلام",
+      CANCELED: "ملغى",
     },
     receive: {
       trigger: "تسجيل كمُستلم",
@@ -280,6 +297,14 @@ const ar: Dictionary = {
         "سيؤدي هذا إلى إضافة الكميات المطلوبة إلى مخزونك وتسجيل المصروف. لا يمكن التراجع عن هذا الإجراء.",
       confirm: "تأكيد الاستلام",
       receiving: "جارٍ التسجيل...",
+    },
+    cancel: {
+      trigger: "إلغاء الأمر",
+      confirmTitle: "إلغاء هذا الأمر؟",
+      confirmDescription:
+        "لم يتم استلام هذا الأمر بعد، لذا لن يتم عكس أي تغييرات في المخزون أو الحسابات. لا يمكن التراجع عن هذا الإجراء.",
+      confirm: "تأكيد الإلغاء",
+      canceling: "جارٍ الإلغاء...",
     },
     detail: {
       title: "تفاصيل أمر الشراء",
