@@ -6,17 +6,31 @@ import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CLASSES } from "../data";
+import { CLASSES, type Member } from "../data";
 import { formatTime } from "../format";
 import { fmt } from "../i18n";
 import { useDemo } from "../state";
 import { BeltChip } from "../components/belt";
 import { MemberAvatar, PageHeader, ProgressBar } from "../components/bits";
+import { ExpiredCheckInDialog } from "../components/expired-dialog";
 
 export function CheckInPage() {
   const { d, L, lang, members, present, checkIn, undoCheckIn, can } = useDemo();
   const [classId, setClassId] = useState("adv");
   const [q, setQ] = useState("");
+
+  const [confirming, setConfirming] = useState<Member | null>(null);
+
+  function doCheckIn(m: Member) {
+    checkIn(m.id);
+    toast.success(fmt(can("parent") ? d.checkin.toastWa : d.checkin.toast, { name: L(m.name) }));
+  }
+
+  // An expired subscription needs the coach's confirmation first.
+  function requestCheckIn(m: Member) {
+    if (m.expiresInDays < 0) setConfirming(m);
+    else doCheckIn(m);
+  }
 
   const cls = CLASSES.find((c) => c.id === classId)!;
   const roster = members.filter((m) => m.classId === classId);
@@ -91,16 +105,10 @@ export function CheckInPage() {
                 key={m.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => {
-                  if (isHere) return;
-                  checkIn(m.id);
-                  toast.success(fmt(can("parent") ? d.checkin.toastWa : d.checkin.toast, { name: L(m.name) }));
-                }}
+                aria-label={`${L(m.name)}: ${d.checkin.tap}`}
+                onClick={() => !isHere && requestCheckIn(m)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !isHere) {
-                    checkIn(m.id);
-                    toast.success(fmt(can("parent") ? d.checkin.toastWa : d.checkin.toast, { name: L(m.name) }));
-                  }
+                  if (e.key === "Enter" && !isHere) requestCheckIn(m);
                 }}
                 className={cn(
                   "relative flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
@@ -111,7 +119,8 @@ export function CheckInPage() {
               >
                 <MemberAvatar id={m.id} name={m.name} size="lg" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{L(m.name)}</p>
+                  {/* Names never truncate: a coach has to tell Nour Farouk from Nour Hamdan. */}
+                  <p className="leading-snug font-semibold break-words">{L(m.name)}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {can("belts") && <BeltChip belt={m.belt} />}
                     {expired && (
@@ -123,7 +132,7 @@ export function CheckInPage() {
                   </div>
                 </div>
                 {isHere ? (
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex shrink-0 flex-col items-center gap-1">
                     <span className="demo-bounce-in flex size-9 items-center justify-center rounded-full bg-emerald-500 text-white">
                       <Check className="size-5" />
                     </span>
@@ -140,13 +149,27 @@ export function CheckInPage() {
                     </button>
                   </div>
                 ) : (
-                  <span className="text-xs text-muted-foreground">{d.checkin.tap}</span>
+                  <span
+                    aria-hidden
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 text-muted-foreground/70"
+                  >
+                    <Check className="size-4" />
+                  </span>
                 )}
               </div>
             );
           })}
         </div>
       )}
+
+      <ExpiredCheckInDialog
+        member={confirming}
+        onCancel={() => setConfirming(null)}
+        onConfirm={(m) => {
+          setConfirming(null);
+          doCheckIn(m);
+        }}
+      />
     </div>
   );
 }

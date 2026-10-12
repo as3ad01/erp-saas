@@ -238,7 +238,9 @@ export function BarChart({
               )}
               style={{ height: `${Math.max(4, (x.value / max) * 100)}%`, minHeight: 4 }}
             />
-            <span className="truncate text-center text-[11px] text-muted-foreground">{x.label}</span>
+            <span className="flex h-7 items-start justify-center text-center text-[11px] leading-tight text-muted-foreground">
+              {x.label}
+            </span>
           </div>
         );
       })}

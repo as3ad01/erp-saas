@@ -90,7 +90,7 @@ export function ChampionsSite({ embedded }: { embedded?: boolean }) {
               <div className="flex items-center gap-3">
                 <MemberAvatar id={m.id} name={m.name} size="lg" />
                 <div className="min-w-0">
-                  <p className="truncate font-semibold">{L(m.name)}</p>
+                  <p className="leading-snug font-semibold">{L(m.name)}</p>
                   <BeltChip belt={m.belt} className="mt-1" />
                 </div>
               </div>

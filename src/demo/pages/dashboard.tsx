@@ -139,7 +139,7 @@ export function DashboardPage() {
                 <div key={m.id} className="flex items-center gap-3">
                   <MemberAvatar id={m.id} name={m.name} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <Link href={`/demo/members/${m.id}`} className="block truncate text-sm font-medium hover:underline">
+                    <Link href={`/demo/members/${m.id}`} className="block text-sm leading-snug font-medium hover:underline">
                       {L(m.name)}
                     </Link>
                     <p className="text-xs text-muted-foreground">{relDays(m.expiresInDays, lang)}</p>
@@ -191,9 +191,13 @@ export function DashboardPage() {
             <CardTitle>{d.dash.beltsTitle}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex h-3 overflow-hidden rounded-full ring-1 ring-black/10">
+            <div className="flex h-3 overflow-hidden rounded-full bg-muted">
               {BELTS.map((b, i) => (
-                <div key={b.id} style={{ width: `${(beltCounts[i] / members.length) * 100}%`, backgroundColor: b.color }} />
+                <div
+                  key={b.id}
+                  className="ring-1 ring-foreground/35 ring-inset"
+                  style={{ width: `${(beltCounts[i] / members.length) * 100}%`, backgroundColor: b.color }}
+                />
               ))}
             </div>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">

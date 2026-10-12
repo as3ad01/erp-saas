@@ -103,7 +103,7 @@ export function ReportsPage() {
                   <BeltChip belt={i} className="w-28 shrink-0" />
                   <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full ring-1 ring-black/10"
+                      className="h-full rounded-full ring-1 ring-foreground/35 ring-inset"
                       style={{ width: `${(n / members.length) * 100 * 2.2}%`, backgroundColor: b.color }}
                     />
                   </div>

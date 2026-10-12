@@ -101,6 +101,7 @@ const en = {
   members: {
     title: "Members",
     subtitle: "{n} members",
+    subtitleFiltered: "{n} of {total} members",
     add: "Add member",
     searchPh: "Search by name or phone",
     allBelts: "All belts",
@@ -140,6 +141,8 @@ const en = {
     attendance: "Attendance",
     sessions: "Sessions this month",
     subscription: "Subscription",
+    renews: "Renews {when}",
+    expiredWhen: "Expired {when}",
     medals: "Medals",
     tabBelts: "Belt history",
     tabAttendance: "Attendance",
@@ -182,6 +185,9 @@ const en = {
     undone: "{name} check-in was removed",
     empty: "No students in this class",
     notStarted: "This class has not started yet",
+    expiredTitle: "Subscription expired",
+    expiredBody: "{name}'s subscription ended {when}. Check them in anyway?",
+    anyway: "Check in anyway",
   },
 
   payments: {
@@ -462,6 +468,7 @@ const ar: Dict = {
   members: {
     title: "الأعضاء",
     subtitle: "{n} عضوًا",
+    subtitleFiltered: "{n} من أصل {total} عضوًا",
     add: "إضافة عضو",
     searchPh: "ابحث بالاسم أو رقم الهاتف",
     allBelts: "كل الأحزمة",
@@ -501,6 +508,8 @@ const ar: Dict = {
     attendance: "الحضور",
     sessions: "حصص هذا الشهر",
     subscription: "الاشتراك",
+    renews: "يتجدد {when}",
+    expiredWhen: "انتهى {when}",
     medals: "الميداليات",
     tabBelts: "سجل الأحزمة",
     tabAttendance: "الحضور",
@@ -543,6 +552,9 @@ const ar: Dict = {
     undone: "أُلغي تسجيل حضور {name}",
     empty: "لا يوجد لاعبون في هذه الحصة",
     notStarted: "لم تبدأ هذه الحصة بعد",
+    expiredTitle: "الاشتراك منتهي",
+    expiredBody: "انتهى اشتراك {name} {when}. هل تريد تسجيل الحضور رغم ذلك؟",
+    anyway: "سجّل الحضور رغم ذلك",
   },
 
   payments: {
