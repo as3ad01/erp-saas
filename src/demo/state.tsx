@@ -9,6 +9,7 @@ import {
   useReducer,
   useState,
 } from "react";
+import { DirectionProvider } from "@base-ui/react/direction-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
   BELTS,
@@ -28,7 +29,7 @@ import {
 } from "./data";
 import { dictionaries, type Dict } from "./i18n";
 import { tierAllows, type Feature } from "./logic";
-import type { WaKind, WaMessage } from "./messages";
+import { demoClock, type WaKind, type WaMessage } from "./messages";
 
 type State = {
   members: Member[];
@@ -57,11 +58,9 @@ function initialState(): State {
   };
 }
 
-type Clock = { h: number; m: number };
-
 type Action =
   | { type: "reset" }
-  | { type: "checkin"; memberId: string; clock: Clock; notify: boolean }
+  | { type: "checkin"; memberId: string; notify: boolean }
   | { type: "undo"; memberId: string }
   | {
       type: "promote";
@@ -69,20 +68,20 @@ type Action =
       score: number;
       coachId: string;
       note: string;
-      clock: Clock;
       notify: boolean;
     }
-  | { type: "remind"; memberIds: string[]; clock: Clock; notify: boolean }
-  | { type: "pay"; memberId: string; clock: Clock; notify: boolean }
-  | { type: "add"; member: Member; parent: Parent; clock: Clock; notify: boolean };
+  | { type: "note"; memberId: string; text: string }
+  | { type: "remind"; memberIds: string[]; notify: boolean }
+  | { type: "pay"; memberId: string; notify: boolean }
+  | { type: "add"; member: Member; parent: Parent; notify: boolean };
 
 function push(
   state: State,
   member: Member,
   kind: WaKind,
-  clock: Clock,
   extra: Partial<WaMessage> = {}
 ): Pick<State, "messages" | "seq"> {
+  const clock = demoClock(state.seq);
   const msg: WaMessage = {
     id: `l${state.seq + 1}`,
     parentId: member.parentId,
@@ -109,18 +108,22 @@ function reducer(state: State, action: Action): State {
       if (list.includes(m.id)) return state;
       const next = { ...state, present: { ...state.present, [m.classId]: [...list, m.id] } };
       if (!action.notify) return next;
-      return { ...next, ...push(next, m, "arrival", action.clock, { classId: m.classId }) };
+      return { ...next, ...push(next, m, "arrival", { classId: m.classId }) };
     }
 
     case "undo": {
       const m = state.members.find((x) => x.id === action.memberId);
       if (!m) return state;
+      // Withdraw the most recent live arrival message too, so checking in again
+      // does not leave the parent with two "arrived" messages.
+      const at = state.messages.map((x) => x.live && x.kind === "arrival" && x.memberId === m.id).lastIndexOf(true);
       return {
         ...state,
         present: {
           ...state.present,
           [m.classId]: (state.present[m.classId] ?? []).filter((id) => id !== m.id),
         },
+        messages: at === -1 ? state.messages : state.messages.filter((_, i) => i !== at),
       };
     }
 
@@ -143,11 +146,17 @@ function reducer(state: State, action: Action): State {
       if (!action.notify) return next;
       return {
         ...next,
-        ...push(next, updated, "promotion", action.clock, {
+        ...push(next, updated, "promotion", {
           belt,
           note: action.note.trim() || undefined,
         }),
       };
+    }
+
+    case "note": {
+      const m = state.members.find((x) => x.id === action.memberId);
+      if (!m) return state;
+      return { ...state, ...push(state, m, "note", { text: action.text }) };
     }
 
     case "remind": {
@@ -158,7 +167,7 @@ function reducer(state: State, action: Action): State {
           if (!m) continue;
           next = {
             ...next,
-            ...push(next, m, "reminder", action.clock, {
+            ...push(next, m, "reminder", {
               amount: PLAN_PRICE[m.plan],
               days: m.expiresInDays,
             }),
@@ -184,7 +193,7 @@ function reducer(state: State, action: Action): State {
         extraRevenue: state.extraRevenue + amount,
       };
       if (!action.notify) return next;
-      return { ...next, ...push(next, updated, "receipt", action.clock, { amount }) };
+      return { ...next, ...push(next, updated, "receipt", { amount }) };
     }
 
     case "add": {
@@ -197,14 +206,9 @@ function reducer(state: State, action: Action): State {
         extraRevenue: state.extraRevenue + PLAN_PRICE[action.member.plan],
       };
       if (!action.notify) return next;
-      return { ...next, ...push(next, action.member, "welcome", action.clock) };
+      return { ...next, ...push(next, action.member, "welcome") };
     }
   }
-}
-
-function clockNow(): Clock {
-  const d = new Date();
-  return { h: d.getHours(), m: d.getMinutes() };
 }
 
 type Ctx = {
@@ -226,13 +230,18 @@ type Ctx = {
   presentTotal: number;
   reminded: string[];
   messages: WaMessage[];
+  /** Time (h, m) the next live WhatsApp message will carry. */
+  nextClock: { h: number; m: number };
   revenueThisMonth: number;
+  /** Members added during this session (for the "new members" figure). */
+  addedCount: number;
 
   checkIn: (memberId: string) => void;
   undoCheckIn: (memberId: string) => void;
   promote: (memberId: string, o: { score: number; coachId: string; note: string }) => void;
   remind: (memberIds: string[]) => void;
   pay: (memberId: string) => void;
+  sendNote: (memberId: string, text: string) => void;
   addMember: (o: {
     name: string;
     age: number;
@@ -315,13 +324,16 @@ export function DemoProvider({
       presentTotal,
       reminded: state.reminded,
       messages: state.messages,
+      nextClock: demoClock(state.seq),
+      addedCount: state.members.filter((m) => m.id.startsWith("mn")).length,
       revenueThisMonth: REVENUE_SERIES[REVENUE_SERIES.length - 1] + state.extraRevenue,
-      checkIn: (memberId) => dispatch({ type: "checkin", memberId, clock: clockNow(), notify }),
+      checkIn: (memberId) => dispatch({ type: "checkin", memberId, notify }),
       undoCheckIn: (memberId) => dispatch({ type: "undo", memberId }),
       promote: (memberId, o) =>
-        dispatch({ type: "promote", memberId, ...o, clock: clockNow(), notify }),
-      remind: (memberIds) => dispatch({ type: "remind", memberIds, clock: clockNow(), notify }),
-      pay: (memberId) => dispatch({ type: "pay", memberId, clock: clockNow(), notify }),
+        dispatch({ type: "promote", memberId, ...o, notify }),
+      remind: (memberIds) => dispatch({ type: "remind", memberIds, notify }),
+      pay: (memberId) => dispatch({ type: "pay", memberId, notify }),
+      sendNote: (memberId, text) => dispatch({ type: "note", memberId, text }),
       addMember: (o) => {
         const idx = state.members.length + 1;
         const parentId = `pn${idx}`;
@@ -339,7 +351,7 @@ export function DemoProvider({
           plan: o.plan,
           expiresInDays: PLAN_DAYS[o.plan],
           joinedDaysAgo: 0,
-          attendance: 100,
+          attendance: 0,
           payments: [{ amount: PLAN_PRICE[o.plan], daysAgo: 0, method: "cash" }],
         };
         const parent: Parent = {
@@ -347,7 +359,7 @@ export function DemoProvider({
           name: { ar: o.parentName, en: o.parentName },
           phone: o.phone,
         };
-        dispatch({ type: "add", member, parent, clock: clockNow(), notify });
+        dispatch({ type: "add", member, parent, notify });
         return member;
       },
       reset: () => dispatch({ type: "reset" }),
@@ -356,8 +368,10 @@ export function DemoProvider({
 
   return (
     <DemoContext.Provider value={value}>
-      {children}
-      <Toaster dir={dir} position={dir === "rtl" ? "top-left" : "top-right"} />
+      <DirectionProvider direction={dir}>
+        {children}
+        <Toaster dir={dir} position={dir === "rtl" ? "top-left" : "top-right"} />
+      </DirectionProvider>
     </DemoContext.Provider>
   );
 }

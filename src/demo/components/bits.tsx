@@ -159,7 +159,7 @@ export function NativeSelect({
         {...rest}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 w-full appearance-none rounded-lg border border-input bg-background ps-3 pe-8 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+        className="h-9 w-full appearance-none rounded-lg border border-input bg-background ps-3 pe-8 text-base outline-none md:text-sm focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
       >
         {children}
       </select>
@@ -222,23 +222,22 @@ export function BarChart({
   className?: string;
 }) {
   const max = Math.max(...data.map((x) => x.value), 1);
+  // Room taken by the value label above a bar (20px) and the axis label below it (34px).
+  const plot = Math.max(40, height - 54);
   return (
     <div className={cn("flex items-end gap-2 sm:gap-3", className)} style={{ height }}>
       {data.map((x, i) => {
         const last = i === data.length - 1;
         return (
-          <div key={i} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1.5">
-            <span className="text-center text-[11px] font-medium text-muted-foreground tabular-nums">
+          <div key={i} className="flex h-full min-w-0 flex-1 flex-col justify-end">
+            <span className="mb-1 h-4 shrink-0 text-center text-[11px] font-medium leading-4 text-muted-foreground tabular-nums">
               {format(x.value)}
             </span>
             <div
-              className={cn(
-                "w-full rounded-t-md transition-all",
-                last ? "bg-primary" : "bg-primary/35"
-              )}
-              style={{ height: `${Math.max(4, (x.value / max) * 100)}%`, minHeight: 4 }}
+              className={cn("w-full shrink-0 rounded-t-md transition-all", last ? "bg-primary" : "bg-primary/35")}
+              style={{ height: Math.max(4, Math.round((x.value / max) * plot)) }}
             />
-            <span className="flex h-7 items-start justify-center text-center text-[11px] leading-tight text-muted-foreground">
+            <span className="mt-1.5 flex h-7 shrink-0 items-start justify-center text-center text-[11px] leading-tight text-muted-foreground">
               {x.label}
             </span>
           </div>

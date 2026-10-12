@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BELTS, BRANCHES, CLASSES, type Member, type Plan } from "../data";
-import { relDays } from "../format";
+import { relDays, years } from "../format";
 import { fmt } from "../i18n";
 import { subStatus } from "../logic";
 import { useDemo } from "../state";
@@ -74,11 +74,15 @@ export function MembersPage() {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
+  const showBelt = can("belts");
+  const showBranch = can("branches");
+
   const needle = q.trim().toLowerCase();
   const rows = members.filter((m) => {
-    if (belt !== "all" && String(m.belt) !== belt) return false;
+    // A filter whose control is hidden by the current package must not keep applying.
+    if (showBelt && belt !== "all" && String(m.belt) !== belt) return false;
     if (status !== "all" && subStatus(m) !== status) return false;
-    if (branch !== "all" && m.branchId !== branch) return false;
+    if (showBranch && branch !== "all" && m.branchId !== branch) return false;
     if (!needle) return true;
     const parent = parentById(m.parentId);
     return (
@@ -89,9 +93,6 @@ export function MembersPage() {
       (parent?.name.ar.includes(needle) ?? false)
     );
   });
-
-  const showBelt = can("belts");
-  const showBranch = can("branches");
 
   // A column that is hidden in the current package cannot be the sort key.
   const activeKey: SortKey =
@@ -191,7 +192,7 @@ export function MembersPage() {
           </NativeSelect>
         )}
         {/* The phone cards have no column headers, so sorting lives here. */}
-        <div className="flex gap-2 md:hidden">
+        <div className="flex gap-2 xl:hidden">
           <NativeSelect
             value={activeKey}
             onChange={(v) => {
@@ -241,7 +242,7 @@ export function MembersPage() {
       ) : (
         <>
           {/* Desktop table */}
-          <Card className="hidden py-0 md:block">
+          <Card className="hidden py-0 xl:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -278,7 +279,7 @@ export function MembersPage() {
                             {L(m.name)}
                           </Link>
                           <p className="text-xs text-muted-foreground">
-                            {fmt(d.common.yrs, { n: m.age })}
+                            {years(m.age, lang)}
                           </p>
                         </div>
                       </div>
@@ -292,8 +293,14 @@ export function MembersPage() {
                     {showBranch && <TableCell>{L(BRANCHES.find((b) => b.id === m.branchId)!.name)}</TableCell>}
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <ProgressBar value={m.attendance} className="w-16" />
-                        <span className="text-xs tabular-nums">{m.attendance}%</span>
+                        {m.attendance > 0 ? (
+                          <>
+                            <ProgressBar value={m.attendance} className="w-16" />
+                            <span className="text-xs tabular-nums">{m.attendance}%</span>
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="pe-4">
@@ -306,15 +313,15 @@ export function MembersPage() {
           </Card>
 
           {/* Mobile cards */}
-          <div className="space-y-2 md:hidden">
+          <div className="grid gap-2 md:grid-cols-2 xl:hidden">
             {sorted.map((m) => (
               <Link key={m.id} href={`/demo/members/${m.id}`}>
-                <Card size="sm" className="mb-2 flex-row items-center gap-3 px-3">
+                <Card size="sm" className="flex-row items-center gap-3 px-3">
                   <MemberAvatar id={m.id} name={m.name} />
                   <div className="min-w-0 flex-1">
                     <p className="leading-snug font-medium break-words">{L(m.name)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {L(CLASSES.find((c) => c.id === m.classId)!.name)} · {m.attendance}%
+                      {L(CLASSES.find((c) => c.id === m.classId)!.name)}{m.attendance > 0 ? ` · ${m.attendance}%` : ""}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -390,7 +397,16 @@ function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label htmlFor="mn-age">{d.members.age}</Label>
-              <Input id="mn-age" type="number" min={3} max={80} value={age} onChange={(e) => setAge(e.target.value)} />
+              <Input
+                id="mn-age"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                dir="ltr"
+                className="text-start"
+                value={age}
+                onChange={(e) => setAge(e.target.value.replace(/\D/g, "").slice(0, 2))}
+              />
             </div>
             <div className="grid gap-1.5">
               <Label>{d.members.plan}</Label>

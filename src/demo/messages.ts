@@ -2,7 +2,7 @@ import { BELTS, CLASSES, CLUB, type Lang, type Member } from "./data";
 import { dictionaries, fmt } from "./i18n";
 import { money, relDays } from "./format";
 
-export type WaKind = "welcome" | "arrival" | "promotion" | "reminder" | "receipt";
+export type WaKind = "welcome" | "arrival" | "promotion" | "reminder" | "receipt" | "note";
 
 export type WaMessage = {
   id: string;
@@ -19,7 +19,17 @@ export type WaMessage = {
   classId?: string;
   amount?: number;
   days?: number;
+  text?: string;
 };
+
+/**
+ * The demo story is set in the early evening, after the 4 PM class. Live messages
+ * continue from 5:40 PM, one minute apart, so the chat is always in order.
+ */
+export function demoClock(seq: number) {
+  const total = 17 * 60 + 40 + seq;
+  return { h: Math.floor(total / 60) % 24, m: total % 60 };
+}
 
 /** Plain text of a message, in the viewer's language. */
 export function messageLines(msg: WaMessage, member: Member, lang: Lang): string[] {
@@ -49,6 +59,8 @@ export function messageLines(msg: WaMessage, member: Member, lang: Lang): string
         amount: money(msg.amount ?? 0, lang),
         when: relDays(msg.days ?? 0, lang),
       }).split("\n");
+    case "note":
+      return (msg.text ?? "").split("\n");
     case "receipt":
       return fmt(d.receipt, { name, amount: money(msg.amount ?? 0, lang) }).split("\n");
   }

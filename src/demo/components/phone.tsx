@@ -128,7 +128,7 @@ export function WhatsAppChat({ parentId }: { parentId: string }) {
           <Logo className="size-8" />
         </span>
         <div className="min-w-0 flex-1 leading-tight">
-          <p className="truncate text-[13px] font-semibold">{L(CLUB.name)}</p>
+          <p className="line-clamp-2 text-[12px] leading-tight font-semibold">{L(CLUB.name)}</p>
           <p className="text-[10px] opacity-80">{fmtBusiness(lang)}</p>
         </div>
         <Video className="size-4 shrink-0" />
@@ -407,7 +407,7 @@ export function ParentApp({
                   </p>
                 </div>
                 <span className="text-[11px] text-muted-foreground">
-                  {h.present ? d.profile.present : d.profile.absent}
+                  {h.present ? (kid.gender === "f" ? d.profile.presentF : d.profile.present) : kid.gender === "f" ? d.profile.absentF : d.profile.absent}
                 </span>
               </div>
             ))}

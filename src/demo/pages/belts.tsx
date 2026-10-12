@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Award, Check, CheckCheck, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BELTS, COACHES, CLASSES, type Member } from "../data";
-import { formatDate } from "../format";
+import { formatDate, years } from "../format";
 import { fmt } from "../i18n";
 import { isEligible, monthsAtBelt } from "../logic";
 import type { WaMessage } from "../messages";
@@ -24,6 +24,7 @@ import { useDemo } from "../state";
 import { BeltGraphic } from "../components/belt";
 import { MemberAvatar, NativeSelect, PageHeader } from "../components/bits";
 import { MessageBubble } from "../components/phone";
+import { useRetained } from "../use-retained";
 
 type Done = { member: Member; belt: number; parentName: string; note: string; h: number; m: number };
 
@@ -56,7 +57,7 @@ export function BeltsPage() {
         <Card className="py-12 text-center text-muted-foreground">{d.belts.nobody}</Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {ready.slice(0, 9).map((m) => (
+          {ready.map((m) => (
             <Card key={m.id} className={m.id === "m1" ? "ring-2 ring-primary/40" : undefined}>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -64,7 +65,7 @@ export function BeltsPage() {
                   <div className="min-w-0">
                     <p className="leading-snug font-semibold break-words">{L(m.name)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {fmt(d.common.yrs, { n: m.age })} · {L(CLASSES.find((c) => c.id === m.classId)!.name)}
+                      {years(m.age, lang)} · {L(CLASSES.find((c) => c.id === m.classId)!.name)}
                     </p>
                   </div>
                 </div>
@@ -133,7 +134,7 @@ export function BeltsPage() {
 }
 
 function PromoteDialog({
-  member,
+  member: memberProp,
   onClose,
   onDone,
 }: {
@@ -141,7 +142,8 @@ function PromoteDialog({
   onClose: () => void;
   onDone: (d: Done) => void;
 }) {
-  const { d, L, can, promote, parentById } = useDemo();
+  const { d, L, can, promote, parentById, nextClock } = useDemo();
+  const member = useRetained(memberProp);
   const [score, setScore] = useState(92);
   const [coachId, setCoachId] = useState("karim");
   const [note, setNote] = useState("");
@@ -157,8 +159,8 @@ function PromoteDialog({
         memberId: member.id,
         kind: "promotion",
         day: "today",
-        h: 17,
-        m: 40,
+        h: nextClock.h,
+        m: nextClock.m,
         belt: next,
         note: note.trim() || undefined,
       }
@@ -172,14 +174,14 @@ function PromoteDialog({
       belt: next,
       parentName: parent ? L(parent.name) : "",
       note: note.trim(),
-      h: new Date().getHours(),
-      m: new Date().getMinutes(),
+      h: nextClock.h,
+      m: nextClock.m,
     });
     setNote("");
   }
 
   return (
-    <Dialog open={!!member} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={!!memberProp} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-md">
         {member && preview && (
           <>
@@ -261,8 +263,9 @@ function PromoteDialog({
   );
 }
 
-function SuccessDialog({ done, onClose }: { done: Done | null; onClose: () => void }) {
+function SuccessDialog({ done: doneProp, onClose }: { done: Done | null; onClose: () => void }) {
   const { d, L, can } = useDemo();
+  const done = useRetained(doneProp);
   const notify = can("parent");
   const msg: WaMessage | null = done
     ? {
@@ -279,7 +282,7 @@ function SuccessDialog({ done, onClose }: { done: Done | null; onClose: () => vo
     : null;
 
   return (
-    <Dialog open={!!done} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={!!doneProp} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md">
         {done && msg && (
           <div className="flex flex-col items-center gap-4 text-center">
@@ -301,10 +304,10 @@ function SuccessDialog({ done, onClose }: { done: Done | null; onClose: () => vo
             )}
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
               {notify && (
-                <Button render={<Link href="/demo/parent" />}>
+                <Link href="/demo/parent" className={buttonVariants()}>
                   <CheckCheck />
                   {d.belts.seePhone}
-                </Button>
+                </Link>
               )}
               <Button variant="outline" onClick={onClose}>
                 {d.belts.done}

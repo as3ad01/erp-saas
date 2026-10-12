@@ -16,13 +16,7 @@ const STAR = star(20, 21, 12.5, 5.2);
 export function Logo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={cn("size-9 shrink-0", className)} aria-hidden>
-      <defs>
-        <linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ef4444" />
-          <stop offset="1" stopColor="#b91c1c" />
-        </linearGradient>
-      </defs>
-      <rect width="40" height="40" rx="11" fill="url(#logo-g)" />
+      <rect width="40" height="40" rx="11" fill="#dc2626" />
       <polygon points={STAR} fill="#fde68a" />
       <circle cx="20" cy="21" r="2.4" fill="#b91c1c" />
     </svg>

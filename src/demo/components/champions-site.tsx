@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, MapPin, Medal as MedalIcon, Phone } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CLASSES, CLUB, COACHES, COMP_RESULTS, EVENTS, MEDAL_COLOR, type Medal } from "../data";
@@ -60,7 +61,11 @@ export function ChampionsSite({ embedded }: { embedded?: boolean }) {
         <p className="mb-3 text-sm tracking-widest text-amber-300 uppercase">🥋 {L(CLUB.name)}</p>
         <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">{s.heroTitle}</h2>
         <p className="mx-auto mt-4 max-w-xl text-white/80">{s.heroSub}</p>
-        <Button size="lg" className="mt-8 h-11 bg-amber-400 px-6 text-base font-bold text-zinc-950 hover:bg-amber-300">
+        <Button
+          size="lg"
+          onClick={() => toast.success(s.bookToast)}
+          className="mt-8 h-11 bg-amber-400 px-6 text-base font-bold text-zinc-950 hover:bg-amber-300"
+        >
           {s.cta}
         </Button>
       </section>

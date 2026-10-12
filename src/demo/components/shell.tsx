@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,7 +21,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { CLUB, type Tier } from "../data";
@@ -64,7 +65,7 @@ const GROUPS: { tier: Tier | null; items: NavItem[] }[] = [
   },
 ];
 
-function NavList({ onNavigate }: { onNavigate?: (children: React.ReactElement) => React.ReactElement }) {
+function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { d, can } = useDemo();
 
@@ -82,10 +83,11 @@ function NavList({ onNavigate }: { onNavigate?: (children: React.ReactElement) =
               item.href === "/demo" ? pathname === "/demo" : pathname === item.href || pathname.startsWith(`${item.href}/`);
             const locked = item.feature ? !can(item.feature) : false;
             const Icon = item.icon;
-            const link = (
+            return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
@@ -99,7 +101,6 @@ function NavList({ onNavigate }: { onNavigate?: (children: React.ReactElement) =
                 {locked && <Lock className="size-3.5 shrink-0 opacity-70" />}
               </Link>
             );
-            return onNavigate ? <div key={item.href}>{onNavigate(link)}</div> : link;
           })}
         </div>
       ))}
@@ -123,12 +124,13 @@ export function Sidebar() {
 }
 
 export function MobileNav() {
-  const { L, dir } = useDemo();
+  const { L, d, dir } = useDemo();
+  const [open, setOpen] = useState(false);
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="md:hidden" aria-label={d.nav.menu}>
             <Menu className="size-5" />
           </Button>
         }
@@ -142,7 +144,7 @@ export function MobileNav() {
           <SheetTitle className="text-sidebar-foreground">{L(CLUB.name)}</SheetTitle>
         </SheetHeader>
         <div className="overflow-y-auto">
-          <NavList onNavigate={(link) => <SheetClose render={link} />} />
+          <NavList onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

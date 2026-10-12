@@ -10,16 +10,27 @@ import { useDemo } from "../state";
 import { BarChart, Money, PageHeader, ProgressBar } from "../components/bits";
 
 export function BranchesPage() {
-  const { d, L, members } = useDemo();
+  const { d, L, members, revenueThisMonth } = useDemo();
 
-  const rows = BRANCHES.map((b) => {
+  // Split this month's revenue between the branches in proportion to what their
+  // members pay, so the branch figures always add up to the dashboard total.
+  const weight = (id: string) =>
+    members
+      .filter((m) => m.branchId === id)
+      .reduce((n, m) => n + (PLAN_PRICE[m.plan] / PLAN_DAYS[m.plan]) * 30, 0);
+  const weights = BRANCHES.map((b) => weight(b.id));
+  const totalWeight = weights.reduce((a, b) => a + b, 0) || 1;
+  const shares = weights.map((w) => Math.round((w / totalWeight) * revenueThisMonth));
+  shares[0] += revenueThisMonth - shares.reduce((a, b) => a + b, 0); // rounding remainder
+
+  const rows = BRANCHES.map((b, i) => {
     const list = members.filter((m) => m.branchId === b.id);
-    const revenue = list.reduce((n, m) => n + Math.round((PLAN_PRICE[m.plan] / PLAN_DAYS[m.plan]) * 30), 0);
+    const tracked = list.filter((m) => m.attendance > 0);
     return {
       b,
       count: list.length,
-      revenue,
-      att: list.length ? Math.round(list.reduce((n, m) => n + m.attendance, 0) / list.length) : 0,
+      revenue: shares[i],
+      att: tracked.length ? Math.round(tracked.reduce((n, m) => n + m.attendance, 0) / tracked.length) : 0,
       expiring: list.filter((m) => m.expiresInDays >= 0 && m.expiresInDays <= 7).length,
     };
   });

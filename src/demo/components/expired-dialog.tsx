@@ -14,10 +14,11 @@ import { relDays } from "../format";
 import { fmt } from "../i18n";
 import { useDemo } from "../state";
 import type { Member } from "../data";
+import { useRetained } from "../use-retained";
 
 /** Asks the coach to confirm before checking in a member whose subscription has expired. */
 export function ExpiredCheckInDialog({
-  member,
+  member: memberProp,
   onCancel,
   onConfirm,
 }: {
@@ -26,8 +27,9 @@ export function ExpiredCheckInDialog({
   onConfirm: (m: Member) => void;
 }) {
   const { d, L, lang } = useDemo();
+  const member = useRetained(memberProp);
   return (
-    <Dialog open={!!member} onOpenChange={(o) => !o && onCancel()}>
+    <Dialog open={!!memberProp} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         {member && (
           <>

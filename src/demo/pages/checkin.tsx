@@ -103,20 +103,21 @@ export function CheckInPage() {
             return (
               <div
                 key={m.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`${L(m.name)}: ${d.checkin.tap}`}
-                onClick={() => !isHere && requestCheckIn(m)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !isHere) requestCheckIn(m);
-                }}
                 className={cn(
-                  "relative flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "relative flex items-center gap-3 rounded-2xl border p-4 transition-all",
                   isHere
                     ? "border-emerald-500/40 bg-emerald-500/10"
                     : "bg-card hover:border-primary/50 hover:shadow-sm active:scale-[0.99]"
                 )}
               >
+                {!isHere && (
+                  <button
+                    type="button"
+                    aria-label={`${L(m.name)}: ${d.checkin.tap}`}
+                    onClick={() => requestCheckIn(m)}
+                    className="absolute inset-0 cursor-pointer rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  />
+                )}
                 <MemberAvatar id={m.id} name={m.name} size="lg" />
                 <div className="min-w-0 flex-1">
                   {/* Names never truncate: a coach has to tell Nour Farouk from Nour Hamdan. */}
@@ -132,19 +133,16 @@ export function CheckInPage() {
                   </div>
                 </div>
                 {isHere ? (
-                  <div className="flex shrink-0 flex-col items-center gap-1">
+                  <div className="relative z-10 flex shrink-0 flex-col items-center gap-0.5">
                     <span className="demo-bounce-in flex size-9 items-center justify-center rounded-full bg-emerald-500 text-white">
                       <Check className="size-5" />
                     </span>
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        undoCheckIn(m.id);
-                      }}
-                      className="flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+                      onClick={() => undoCheckIn(m.id)}
+                      className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
                     >
-                      <Undo2 className="size-3" />
+                      <Undo2 className="size-3.5" />
                       {d.checkin.undo}
                     </button>
                   </div>

@@ -8,10 +8,16 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"] });
 
-export const metadata: Metadata = {
-  title: "Golden Dragon Academy | Demo",
-  description: "Martial arts club management demo",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await cookies();
+  const ar = store.get("locale")?.value !== "en";
+  return {
+    title: ar ? "أكاديمية التنين الذهبي | نظام إدارة النادي" : "Golden Dragon Academy | Club management",
+    description: ar
+      ? "نظام لإدارة نوادي الفنون القتالية: الأعضاء والاشتراكات والحضور والأحزمة وتحديثات واتساب لأولياء الأمور."
+      : "Club management for martial arts clubs: members, subscriptions, attendance, belts and WhatsApp updates for parents.",
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

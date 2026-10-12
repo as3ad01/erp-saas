@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { Copy, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useDemo } from "../state";
 import { PageHeader } from "../components/bits";
 import { ChampionsSite } from "../components/champions-site";
@@ -31,10 +31,10 @@ export function WebsitePage() {
               <Copy />
               {d.site.copyLink}
             </Button>
-            <Button render={<Link href="/demo/site" target="_blank" />}>
+            <Link href="/demo/site" className={buttonVariants()}>
               <ExternalLink />
               {d.site.openFull}
-            </Button>
+            </Link>
           </>
         }
       />
