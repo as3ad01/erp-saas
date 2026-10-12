@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  BadgeCheck,
   BatteryFull,
   CalendarCheck,
   CheckCheck,
@@ -129,10 +128,7 @@ export function WhatsAppChat({ parentId }: { parentId: string }) {
           <Logo className="size-8" />
         </span>
         <div className="min-w-0 flex-1 leading-tight">
-          <p className="flex items-center gap-1 truncate text-[13px] font-semibold">
-            {L(CLUB.name)}
-            <BadgeCheck className="size-3.5 shrink-0 fill-[#25d366] text-white" />
-          </p>
+          <p className="truncate text-[13px] font-semibold">{L(CLUB.name)}</p>
           <p className="text-[10px] opacity-80">{fmtBusiness(lang)}</p>
         </div>
         <Video className="size-4 shrink-0" />
