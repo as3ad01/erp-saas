@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Award, CalendarCheck, CheckCheck, Medal as MedalIcon, MessageCircle, Phone, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,27 +19,29 @@ import {
   PLAN_PRICE,
   attendanceHistory,
 } from "../data";
-import { formatDate, formatDay, formatMonthYear, formatWeekday, money, relDays } from "../format";
+import { formatDate, formatDay, formatMonthYear, formatWeekday, money, relDays, years } from "../format";
 import { fmt } from "../i18n";
 import { isEligible, subStatus } from "../logic";
 import { useDemo } from "../state";
 import { BeltChip, BeltGraphic } from "../components/belt";
 import { InlineLock, Ltr, MedalChip, MemberAvatar, Money, StatusBadge } from "../components/bits";
 import { ExpiredCheckInDialog } from "../components/expired-dialog";
+import { NoteDialog } from "../components/note-dialog";
 
 export function ProfilePage({ id }: { id: string }) {
   const { d, L, lang, dir, now, memberById, parentById, can, present, checkIn, undoCheckIn } = useDemo();
   const m = memberById(id);
   const [confirming, setConfirming] = useState(false);
+  const [noting, setNoting] = useState(false);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
 
   if (!m) {
     return (
       <div className="py-20 text-center">
         <p className="mb-4 text-muted-foreground">{d.profile.notFound}</p>
-        <Button variant="outline" render={<Link href="/demo/members" />}>
+        <Link href="/demo/members" className={buttonVariants({ variant: "outline" })}>
           {d.profile.back}
-        </Button>
+        </Link>
       </div>
     );
   }
@@ -78,7 +80,7 @@ export function ProfilePage({ id }: { id: string }) {
               <StatusBadge status={subStatus(m)} />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {fmt(d.common.yrs, { n: m.age })} · {L(cls.name)}
+              {years(m.age, lang)} · {L(cls.name)}
               {can("branches") && <> · {L(branch.name)}</>}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -113,25 +115,24 @@ export function ProfilePage({ id }: { id: string }) {
               {here ? d.checkin.checkedIn : d.profile.checkIn}
             </Button>
             {can("belts") && (
-              <Button variant={eligible ? "default" : "outline"} render={<Link href="/demo/belts" />}>
+              <Link href="/demo/belts" className={buttonVariants({ variant: eligible ? "default" : "outline" })}>
                 <Award />
                 {d.profile.promote}
+              </Link>
+            )}
+            {can("parent") && (
+              <Button variant="outline" onClick={() => setNoting(true)}>
+                <MessageCircle />
+                {d.profile.message}
               </Button>
             )}
-            <Button
-              variant="outline"
-              onClick={() => toast.success(fmt(d.profile.messageSent, { parent: parent ? L(parent.name) : "" }))}
-            >
-              <MessageCircle />
-              {d.profile.message}
-            </Button>
           </div>
         </CardContent>
       </Card>
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Mini icon={CalendarCheck} label={d.profile.attendance} value={`${m.attendance}%`} />
-        <Mini icon={CheckCheck} label={d.profile.sessions} value={String(sessions)} />
+        <Mini icon={CalendarCheck} label={d.profile.attendance} value={m.attendance > 0 ? `${m.attendance}%` : "—"} />
+        <Mini icon={CheckCheck} label={d.profile.sessions} value={m.attendance > 0 ? String(sessions) : "—"} />
         <Mini
           icon={Wallet}
           label={d.profile.subscription}
@@ -194,10 +195,12 @@ export function ProfilePage({ id }: { id: string }) {
           <Card>
             <CardHeader>
               <CardTitle>
-                {d.profile.last12} · {fmt(d.profile.rate, { n: m.attendance })}
+                {d.profile.last12}
+                {m.attendance > 0 && <> · {fmt(d.profile.rate, { n: m.attendance })}</>}
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {history.length === 0 && <p className="py-6 text-center text-muted-foreground">{d.profile.noSessions}</p>}
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
                 {history.map((h, i) => (
                   <div
@@ -217,7 +220,7 @@ export function ProfilePage({ id }: { id: string }) {
                         h.present ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400"
                       )}
                     >
-                      {h.present ? d.profile.present : d.profile.absent}
+                      {h.present ? (m.gender === "f" ? d.profile.presentF : d.profile.present) : m.gender === "f" ? d.profile.absentF : d.profile.absent}
                     </p>
                   </div>
                 ))}
@@ -292,6 +295,7 @@ export function ProfilePage({ id }: { id: string }) {
         </TabsContent>
       </Tabs>
 
+      <NoteDialog member={noting ? m : null} onClose={() => setNoting(false)} />
       <ExpiredCheckInDialog
         member={confirming ? m : null}
         onCancel={() => setConfirming(false)}

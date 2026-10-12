@@ -222,3 +222,8 @@ html.demo[lang="ar"] {
 .demo-bounce-in {
   animation: demo-bounce-in 0.55s ease-out both;
 }
+
+/* Letter-spacing breaks the joins between Arabic letters. */
+html.demo[lang="ar"] * {
+  letter-spacing: 0 !important;
+}

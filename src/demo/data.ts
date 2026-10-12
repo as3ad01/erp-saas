@@ -280,6 +280,7 @@ export function classDaysFor(m: Member) {
 
 /** The last 12 sessions a member could have attended, newest first. Never on a Friday. */
 export function attendanceHistory(m: Member, now: Date) {
+  if (m.attendance === 0) return []; // brand-new member: no sessions yet
   const days = classDaysFor(m);
   const seed = Number(m.id.replace(/\D/g, ""));
   const out: { daysAgo: number; present: boolean }[] = [];

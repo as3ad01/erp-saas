@@ -98,7 +98,7 @@ export function PaymentsPage() {
         ))}
       </div>
 
-      <Card className="hidden py-0 md:block">
+      <Card className="hidden py-0 xl:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -152,7 +152,7 @@ export function PaymentsPage() {
         </Table>
       </Card>
 
-      <div className="space-y-2 md:hidden">
+      <div className="grid gap-2 md:grid-cols-2 xl:hidden">
         {rows.slice(0, 40).map((m) => {
           const st = subStatus(m);
           const due = st !== "active";

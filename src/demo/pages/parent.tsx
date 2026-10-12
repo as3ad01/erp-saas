@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Lightbulb } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { DEMO_PARENT_ID } from "../data";
@@ -21,10 +21,10 @@ export function ParentPage() {
         title={d.parent.title}
         subtitle={d.parent.subtitle}
         actions={
-          <Button variant="outline" render={<Link href="/demo/phone" target="_blank" />}>
+          <Link href="/demo/phone" className={buttonVariants({ variant: "outline" })}>
             <ExternalLink />
             {d.parent.openReal}
-          </Button>
+          </Link>
         }
       />
 

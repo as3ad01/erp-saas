@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { CalendarDays, Banknote, Clock, UserCheck, UserRoundX } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ATTENDANCE_WEEK, BELTS, CLASSES, COACHES, REVENUE_SERIES, WEEK_DAYS } from "../data";
@@ -23,7 +23,7 @@ export function DashboardPage() {
     .sort((a, b) => a.expiresInDays - b.expiresInDays);
   const rosterTotal = members.length;
   const prev = REVENUE_SERIES[REVENUE_SERIES.length - 2];
-  const growth = Math.round(((REVENUE_SERIES[REVENUE_SERIES.length - 1] - prev) / prev) * 100);
+  const growth = Math.round(((revenueThisMonth - prev) / prev) * 100);
 
   const revenueData = REVENUE_SERIES.map((v, i) => ({
     label: formatMonth(now, REVENUE_SERIES.length - 1 - i, lang),
@@ -156,9 +156,9 @@ export function DashboardPage() {
               );
             })}
             {expiring.length > 6 && (
-              <Button variant="ghost" size="sm" className="w-full" render={<Link href="/demo/payments" />}>
+              <Link href="/demo/payments" className={buttonVariants({ variant: "ghost", size: "sm", className: "w-full" })}>
                 {d.dash.viewAll}
-              </Button>
+              </Link>
             )}
           </CardContent>
         </Card>

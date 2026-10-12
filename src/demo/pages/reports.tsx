@@ -11,10 +11,11 @@ import { BarChart, PageHeader, ProgressBar, StatCard } from "../components/bits"
 import { BeltChip } from "../components/belt";
 
 export function ReportsPage() {
-  const { d, L, lang, now, members, revenueThisMonth } = useDemo();
+  const { d, L, lang, now, members, revenueThisMonth, addedCount } = useDemo();
 
   const active = members.filter((m) => m.expiresInDays >= 0).length;
-  const avgAtt = Math.round(members.reduce((n, m) => n + m.attendance, 0) / members.length);
+  const tracked = members.filter((m) => m.attendance > 0);
+  const avgAtt = Math.round(tracked.reduce((n, m) => n + m.attendance, 0) / Math.max(1, tracked.length));
   const mature = members.filter((m) => m.joinedDaysAgo > 90);
   const retention = Math.round((mature.filter((m) => m.expiresInDays >= 0).length / Math.max(1, mature.length)) * 100);
 
@@ -24,11 +25,11 @@ export function ReportsPage() {
   }));
   const joins = NEW_MEMBERS_SERIES.map((v, i) => ({
     label: formatMonth(now, NEW_MEMBERS_SERIES.length - 1 - i, lang),
-    value: v,
+    value: i === NEW_MEMBERS_SERIES.length - 1 ? v + addedCount : v,
   }));
 
   const byClass = CLASSES.map((c) => {
-    const list = members.filter((m) => m.classId === c.id);
+    const list = members.filter((m) => m.classId === c.id && m.attendance > 0);
     return { c, avg: list.length ? Math.round(list.reduce((n, m) => n + m.attendance, 0) / list.length) : 0, n: list.length };
   });
   const plans = (["monthly", "quarterly", "annual"] as const).map((p) => ({

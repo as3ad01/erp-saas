@@ -99,3 +99,11 @@ export function weekdayName(day: number, lang: Lang) {
   const d = new Date(Date.UTC(2024, 0, 7 + day));
   return new Intl.DateTimeFormat(intlLocale(lang), { weekday: "short", timeZone: "UTC" }).format(d);
 }
+
+/** "10 yrs" / "10 سنوات". Arabic counted nouns change form with the number. */
+export function years(n: number, lang: Lang) {
+  if (lang === "en") return `${n} yrs`;
+  if (n === 1) return "سنة";
+  if (n === 2) return "سنتان";
+  return n <= 10 ? `${n} سنوات` : `${n} سنة`;
+}
