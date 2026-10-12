@@ -10,4 +10,4 @@ A sales demo, not the real product. It runs at `/demo` with no login and no data
 
 Pitch flow: Belt promotions -> promote Omar -> "See it on the parent's phone".
 `/demo/phone` is the parents' app full screen (for a real phone) and `/demo/site` is the champions website.
-The demo has its own root layout, so it works without Clerk or database env vars.
+The app needs no environment variables.

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { Cairo, Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import "../globals.css";
+import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -18,9 +18,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// Standalone root layout: the demo has no auth and no database, so it does
-// not share the Clerk-wrapped layout used by the main app.
-export default async function DemoRootLayout({ children }: { children: React.ReactNode }) {
+// The demo has no auth and no database, so this layout stays minimal.
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const store = await cookies();
   const lang = store.get("locale")?.value === "en" ? "en" : "ar";
 
