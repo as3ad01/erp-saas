@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { getLocale } from "@/i18n/get-locale";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { isRtl } from "@/i18n/config";
-import "./globals.css";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
