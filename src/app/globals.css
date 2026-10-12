@@ -128,3 +128,97 @@
     @apply font-sans;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Martial arts club demo theme (scoped to <html class="demo">)        */
+/* ------------------------------------------------------------------ */
+
+html.demo {
+  --background: oklch(0.985 0.003 60);
+  --foreground: oklch(0.2 0.012 30);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.012 30);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.012 30);
+  --primary: oklch(0.54 0.22 25);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.96 0.006 60);
+  --secondary-foreground: oklch(0.25 0.012 30);
+  --muted: oklch(0.962 0.006 60);
+  --muted-foreground: oklch(0.5 0.015 40);
+  --accent: oklch(0.955 0.012 40);
+  --accent-foreground: oklch(0.25 0.012 30);
+  --border: oklch(0.915 0.008 60);
+  --input: oklch(0.9 0.008 60);
+  --ring: oklch(0.62 0.16 25);
+  --sidebar: oklch(0.2 0.012 25);
+  --sidebar-foreground: oklch(0.96 0.005 60);
+  --sidebar-primary: oklch(0.55 0.22 25);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.29 0.016 25);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.62 0.16 25);
+}
+
+html.demo.dark {
+  --background: oklch(0.16 0.008 25);
+  --foreground: oklch(0.96 0.005 60);
+  --card: oklch(0.21 0.01 25);
+  --card-foreground: oklch(0.96 0.005 60);
+  --popover: oklch(0.23 0.01 25);
+  --popover-foreground: oklch(0.96 0.005 60);
+  --primary: oklch(0.62 0.21 25);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.27 0.012 25);
+  --secondary-foreground: oklch(0.96 0.005 60);
+  --muted: oklch(0.26 0.012 25);
+  --muted-foreground: oklch(0.72 0.012 50);
+  --accent: oklch(0.28 0.014 25);
+  --accent-foreground: oklch(0.96 0.005 60);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.6 0.16 25);
+  --sidebar: oklch(0.13 0.008 25);
+  --sidebar-foreground: oklch(0.96 0.005 60);
+  --sidebar-primary: oklch(0.58 0.22 25);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.24 0.014 25);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+}
+
+html.demo {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+html.demo[lang="ar"] {
+  font-family: var(--font-cairo), var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@keyframes demo-banner {
+  0% { transform: translateY(-130%); opacity: 0; }
+  8% { transform: translateY(0); opacity: 1; }
+  86% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-130%); opacity: 0; }
+}
+.demo-banner {
+  animation: demo-banner 5.5s ease-in-out both;
+}
+
+@keyframes demo-pop {
+  from { transform: translateY(8px) scale(0.94); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.demo-pop {
+  animation: demo-pop 0.35s ease-out both;
+}
+
+@keyframes demo-bounce-in {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.demo-bounce-in {
+  animation: demo-bounce-in 0.55s ease-out both;
+}
