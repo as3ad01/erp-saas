@@ -5,9 +5,9 @@ import { MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRANCHES, PLAN_DAYS, PLAN_PRICE } from "../data";
-import { money } from "../format";
+import { plainNumber } from "../format";
 import { useDemo } from "../state";
-import { BarChart, Ltr, PageHeader, ProgressBar } from "../components/bits";
+import { BarChart, Money, PageHeader, ProgressBar } from "../components/bits";
 
 export function BranchesPage() {
   const { d, L, members } = useDemo();
@@ -49,7 +49,7 @@ export function BranchesPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Row label={d.branches.members} value={count} />
-              <Row label={d.branches.revenue} value={<Ltr>{money(revenue)}</Ltr>} />
+              <Row label={d.branches.revenue} value={<Money n={revenue} />} />
               <Row label={d.branches.attendance} value={`${att}%`} />
               <Row label={d.branches.expiring} value={expiring} />
               <div>
@@ -72,10 +72,12 @@ export function BranchesPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{d.branches.revenue}</CardTitle>
+            <CardTitle>
+              {d.branches.revenue} ({d.common.currency})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart data={rows.map((r) => ({ label: L(r.b.name), value: r.revenue }))} format={money} height={180} />
+            <BarChart data={rows.map((r) => ({ label: L(r.b.name), value: r.revenue }))} format={plainNumber} height={180} />
           </CardContent>
         </Card>
       </div>

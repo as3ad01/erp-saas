@@ -32,16 +32,17 @@ export const MIN_ATTENDANCE_FOR_PROMOTION = 75;
 
 // ---------------------------------------------------------------- plans
 
-export const PLAN_PRICE: Record<Plan, number> = { monthly: 45, quarterly: 120, annual: 420 };
+// Jordanian dinars (JD). A kids' club in Amman charges roughly 25-40 JD a month.
+export const PLAN_PRICE: Record<Plan, number> = { monthly: 30, quarterly: 80, annual: 300 };
 export const PLAN_DAYS: Record<Plan, number> = { monthly: 30, quarterly: 90, annual: 365 };
 
 // ---------------------------------------------------------------- people
 
 export type Coach = { id: string; name: Bi };
 export const COACHES: Record<string, Coach> = {
-  karim: { id: "karim", name: { ar: "السنسي كريم", en: "Sensei Karim" } },
-  layla: { id: "layla", name: { ar: "السنسي ليلى", en: "Sensei Layla" } },
-  hassan: { id: "hassan", name: { ar: "السنسي حسن", en: "Sensei Hassan" } },
+  karim: { id: "karim", name: { ar: "كابتن كريم", en: "Coach Karim" } },
+  layla: { id: "layla", name: { ar: "كابتن ليلى", en: "Coach Layla" } },
+  hassan: { id: "hassan", name: { ar: "كابتن حسن", en: "Coach Hassan" } },
 };
 
 export type Branch = { id: string; name: Bi; area: Bi };
@@ -196,11 +197,19 @@ function makeMember(args: {
   };
 }
 
+/** A Jordanian mobile number: +962 7X XXX XXXX. */
+function jordanPhone(i: number) {
+  const operator = ["77", "78", "79"][i % 3];
+  const mid = String(300 + (hash(i, 50) % 600));
+  const end = String(1000 + (hash(i, 51) % 9000));
+  return `+962 ${operator} ${mid} ${end}`;
+}
+
 // The family used for the parents' phone demo.
 export const DEMO_PARENT_ID = "p1";
 
 const parents: Parent[] = [
-  { id: "p1", name: { ar: "محمد الراشد", en: "Mohammed Al-Rashid" }, phone: "+1 555 010 0101" },
+  { id: "p1", name: { ar: "محمد الراشد", en: "Mohammed Al-Rashid" }, phone: "+962 79 512 3401" },
 ];
 
 const members: Member[] = [
@@ -232,7 +241,7 @@ for (let n = 0; n < 46; n++) {
       ar: `${dad.ar} ${fam.ar}`,
       en: `${dad.en} ${fam.en}`,
     },
-    phone: `+1 555 010 ${String(200 + n * 7).padStart(4, "0")}`,
+    phone: jordanPhone(n + 3),
   });
   members.push(
     makeMember({
@@ -261,13 +270,25 @@ export function parentOf(id: string) {
 
 // ---------------------------------------------------------------- attendance
 
-/** Last 12 sessions for a member, newest first. Deterministic from the rate. */
-export function attendanceHistory(m: Member) {
-  const seed = Number(m.id.slice(1));
-  return Array.from({ length: 12 }, (_, k) => ({
-    daysAgo: k === 0 ? 2 : 2 + k * 2 + (k % 3 === 0 ? 1 : 0),
-    present: hash(seed * 31 + k, 17) % 100 < m.attendance,
-  }));
+/**
+ * The club is open Saturday to Thursday and closed on Fridays. Each student
+ * trains three days a week: Sun/Tue/Thu or Sat/Mon/Wed (0 = Sunday ... 6 = Saturday).
+ */
+export function classDaysFor(m: Member) {
+  return Number(m.id.replace(/\D/g, "")) % 2 === 1 ? [0, 2, 4] : [6, 1, 3];
+}
+
+/** The last 12 sessions a member could have attended, newest first. Never on a Friday. */
+export function attendanceHistory(m: Member, now: Date) {
+  const days = classDaysFor(m);
+  const seed = Number(m.id.replace(/\D/g, ""));
+  const out: { daysAgo: number; present: boolean }[] = [];
+  for (let back = 1; out.length < 12 && back < 60; back++) {
+    const weekday = new Date(now.getTime() - back * 86_400_000).getUTCDay();
+    if (!days.includes(weekday)) continue;
+    out.push({ daysAgo: back, present: hash(seed * 31 + out.length, 17) % 100 < m.attendance });
+  }
+  return out;
 }
 
 /** Who was already in class before the demo started. */
@@ -290,9 +311,11 @@ export function initialPresent(): Record<string, string[]> {
 // ---------------------------------------------------------------- money
 
 /** Last six months, oldest first. The last entry is "this month". */
-export const REVENUE_SERIES = [2480, 2610, 2750, 2690, 2940, 3180];
+export const REVENUE_SERIES = [1180, 1250, 1320, 1290, 1430, 1560];
 export const NEW_MEMBERS_SERIES = [4, 6, 5, 9, 7, 8];
-export const ATTENDANCE_WEEK = [78, 84, 81, 88, 91, 86, 74]; // last 7 days %
+// Attendance % for Saturday to Thursday. The club is closed on Fridays.
+export const WEEK_DAYS = [6, 0, 1, 2, 3, 4]; // 0 = Sunday ... 6 = Saturday
+export const ATTENDANCE_WEEK = [82, 79, 85, 88, 81, 86];
 
 // ---------------------------------------------------------------- competitions
 

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { FEATURE_TIER, initials, type Feature, type SubStatus } from "../logic";
 import { fmt } from "../i18n";
+import { money } from "../format";
 import { useDemo } from "../state";
 import { MEDAL_COLOR, type Bi, type Medal } from "../data";
 
@@ -35,6 +36,12 @@ export function Ltr({ children, className }: { children: React.ReactNode; classN
       {children}
     </span>
   );
+}
+
+/** A price in dinars. <bdi> keeps "30 د.أ" / "JD 30" reading correctly in either direction. */
+export function Money({ n }: { n: number }) {
+  const { lang } = useDemo();
+  return <bdi className="tabular-nums">{money(n, lang)}</bdi>;
 }
 
 export function StatCard({

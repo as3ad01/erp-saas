@@ -11,8 +11,8 @@ import { MemberAvatar } from "./bits";
 import { Logo } from "./logo";
 
 const STRINGS = {
-  en: { weekdays: "Sun, Tue, Thu" },
-  ar: { weekdays: "الأحد، الثلاثاء، الخميس" },
+  en: { weekdays: "Sat – Thu" },
+  ar: { weekdays: "السبت – الخميس" },
 };
 
 /** The public website a club would get with the Pro package. */
@@ -155,7 +155,7 @@ export function ChampionsSite({ embedded }: { embedded?: boolean }) {
         </span>
         <span className="flex items-center gap-1.5">
           <Phone className="size-3.5" />
-          <span dir="ltr">+1 555 010 0100</span>
+          <span dir="ltr">+962 79 500 0100</span>
         </span>
       </footer>
     </div>

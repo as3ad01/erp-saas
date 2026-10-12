@@ -42,7 +42,6 @@ type State = {
 
 const SEED_MESSAGES: WaMessage[] = [
   { id: "s1", parentId: "p1", memberId: "m1", kind: "welcome", day: "yesterday", h: 9, m: 12 },
-  { id: "s2", parentId: "p1", memberId: "m2", kind: "arrival", day: "yesterday", h: 16, m: 2, classId: "beg" },
   { id: "s3", parentId: "p1", memberId: "m2", kind: "arrival", day: "today", h: 16, m: 4, classId: "beg" },
 ];
 

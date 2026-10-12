@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { BellRing, CircleDollarSign, HandCoins, UsersRound } from "lucide-react";
+import { BellRing, Banknote, HandCoins, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,7 +13,7 @@ import { money, relDays } from "../format";
 import { fmt } from "../i18n";
 import { subStatus } from "../logic";
 import { useDemo } from "../state";
-import { Ltr, MemberAvatar, PageHeader, StatCard, StatusBadge } from "../components/bits";
+import { MemberAvatar, Money, PageHeader, StatCard, StatusBadge } from "../components/bits";
 
 type Filter = "all" | "soon" | "overdue";
 
@@ -54,7 +54,7 @@ export function PaymentsPage() {
 
   function record(m: Member) {
     pay(m.id);
-    toast.success(fmt(d.payments.recorded, { amount: PLAN_PRICE[m.plan], name: L(m.name) }));
+    toast.success(fmt(d.payments.recorded, { amount: money(PLAN_PRICE[m.plan], lang), name: L(m.name) }));
   }
 
   const tabs: { id: Filter; label: string }[] = [
@@ -77,8 +77,8 @@ export function PaymentsPage() {
       />
 
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <StatCard icon={HandCoins} tone="warn" label={d.payments.outstanding} value={<Ltr>{money(outstanding)}</Ltr>} />
-        <StatCard icon={CircleDollarSign} tone="good" label={d.payments.collected} value={<Ltr>{money(revenueThisMonth)}</Ltr>} />
+        <StatCard icon={HandCoins} tone="warn" label={d.payments.outstanding} value={<Money n={outstanding} />} />
+        <StatCard icon={Banknote} tone="good" label={d.payments.collected} value={<Money n={revenueThisMonth} />} />
         <StatCard icon={UsersRound} label={d.payments.activeSubs} value={activeCount} />
       </div>
 
@@ -127,7 +127,7 @@ export function PaymentsPage() {
                   </TableCell>
                   <TableCell>{d.plan[m.plan]}</TableCell>
                   <TableCell className="font-medium">
-                    <Ltr>{money(PLAN_PRICE[m.plan])}</Ltr>
+                    <Money n={PLAN_PRICE[m.plan]} />
                   </TableCell>
                   <TableCell className="text-muted-foreground">{relDays(m.expiresInDays, lang)}</TableCell>
                   <TableCell>
@@ -164,7 +164,7 @@ export function PaymentsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{L(m.name)}</p>
                   <p className="text-xs text-muted-foreground">
-                    {d.plan[m.plan]} · <Ltr>{money(PLAN_PRICE[m.plan])}</Ltr> · {relDays(m.expiresInDays, lang)}
+                    {d.plan[m.plan]} · <Money n={PLAN_PRICE[m.plan]} /> · {relDays(m.expiresInDays, lang)}
                   </p>
                 </div>
                 <StatusBadge status={st} />

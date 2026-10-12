@@ -23,7 +23,7 @@ import { fmt } from "../i18n";
 import { isEligible, subStatus } from "../logic";
 import { useDemo } from "../state";
 import { BeltChip, BeltGraphic } from "../components/belt";
-import { InlineLock, Ltr, MedalChip, MemberAvatar, StatusBadge } from "../components/bits";
+import { InlineLock, Ltr, MedalChip, MemberAvatar, Money, StatusBadge } from "../components/bits";
 
 export function ProfilePage({ id }: { id: string }) {
   const { d, L, lang, dir, now, memberById, parentById, can, present, checkIn, undoCheckIn } = useDemo();
@@ -45,7 +45,7 @@ export function ProfilePage({ id }: { id: string }) {
   const cls = CLASSES.find((c) => c.id === m.classId)!;
   const branch = BRANCHES.find((b) => b.id === m.branchId)!;
   const here = present[m.classId]?.includes(m.id) ?? false;
-  const history = attendanceHistory(m);
+  const history = attendanceHistory(m, now);
   const medals = COMP_RESULTS.filter((r) => r.memberId === m.id);
   const eligible = isEligible(m);
   const sessions = Math.round((m.attendance / 100) * 12);
@@ -127,7 +127,7 @@ export function ProfilePage({ id }: { id: string }) {
           icon={Wallet}
           label={d.profile.subscription}
           value={relDays(m.expiresInDays, lang)}
-          sub={`${d.plan[m.plan]} · ${money(PLAN_PRICE[m.plan])}`}
+          sub={`${d.plan[m.plan]} · ${money(PLAN_PRICE[m.plan], lang)}`}
           warn={m.expiresInDays <= 7}
         />
         <Mini
@@ -231,7 +231,7 @@ export function ProfilePage({ id }: { id: string }) {
                   <TableRow key={i}>
                     <TableCell className="py-3 ps-4">{formatDate(now, p.daysAgo, lang)}</TableCell>
                     <TableCell className="font-medium">
-                      <Ltr>{money(p.amount)}</Ltr>
+                      <Money n={p.amount} />
                     </TableCell>
                     <TableCell>{d.method[p.method]}</TableCell>
                     <TableCell className="pe-4">

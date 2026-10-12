@@ -30,13 +30,13 @@ import {
   PLAN_PRICE,
   attendanceHistory,
 } from "../data";
-import { formatDay, formatTime, formatWeekday, formatDate, money, relDays } from "../format";
+import { formatDay, formatTime, formatWeekday, formatDate, relDays } from "../format";
 import { fmt } from "../i18n";
 import { beltProgress, isEligible } from "../logic";
 import { messageLines, type WaMessage } from "../messages";
 import { useDemo } from "../state";
 import { BeltGraphic } from "./belt";
-import { Ltr, ProgressBar } from "./bits";
+import { Money, ProgressBar } from "./bits";
 import { Logo } from "./logo";
 
 // ------------------------------------------------------------ phone frame
@@ -358,7 +358,7 @@ export function ParentApp({
                 {due ? (
                   <>
                     <p className="text-lg font-bold tabular-nums">
-                      <Ltr>{money(amount)}</Ltr>
+                      <Money n={amount} />
                     </p>
                     <p className="text-[10px] text-amber-700 dark:text-amber-400">
                       {fmt(d.parent.dueIn, { when: relDays(kid.expiresInDays, lang) })}
@@ -394,7 +394,7 @@ export function ParentApp({
         {tab === "attendance" && (
           <div className="space-y-2 p-3">
             <p className="text-xs font-semibold">{d.parent.recentClasses}</p>
-            {attendanceHistory(kid).map((h, i) => (
+            {attendanceHistory(kid, now).map((h, i) => (
               <div key={i} className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2 shadow-sm">
                 <span
                   className={cn(
@@ -425,7 +425,7 @@ export function ParentApp({
               {due ? (
                 <>
                   <p className="text-xl font-bold">
-                    <Ltr>{money(amount)}</Ltr>
+                    <Money n={amount} />
                   </p>
                   <p className="text-[11px] text-amber-700 dark:text-amber-400">
                     {fmt(d.parent.dueIn, { when: relDays(kid.expiresInDays, lang) })}
@@ -448,7 +448,7 @@ export function ParentApp({
                   </p>
                 </div>
                 <span className="text-sm font-semibold tabular-nums">
-                  <Ltr>{money(p.amount)}</Ltr>
+                  <Money n={p.amount} />
                 </span>
               </div>
             ))}

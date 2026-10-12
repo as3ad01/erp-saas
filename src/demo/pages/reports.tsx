@@ -5,7 +5,7 @@ import { Download, Gauge, Repeat, Users, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BELTS, CLASSES, NEW_MEMBERS_SERIES, REVENUE_SERIES } from "../data";
-import { formatMonth, money } from "../format";
+import { formatMonth, plainNumber } from "../format";
 import { useDemo } from "../state";
 import { BarChart, PageHeader, ProgressBar, StatCard } from "../components/bits";
 import { BeltChip } from "../components/belt";
@@ -59,10 +59,12 @@ export function ReportsPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{d.reports.revenueTitle}</CardTitle>
+            <CardTitle>
+              {d.reports.revenueTitle} ({d.common.currency})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart data={revenue} format={money} height={200} />
+            <BarChart data={revenue} format={plainNumber} height={200} />
           </CardContent>
         </Card>
         <Card>

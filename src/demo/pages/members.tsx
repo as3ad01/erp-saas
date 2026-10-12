@@ -228,7 +228,7 @@ function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
       name: name.trim(),
       age: Number(age),
       parentName: parentName.trim() || name.trim(),
-      phone: phone.trim() || "+1 555 010 0000",
+      phone: phone.trim() || "+962 79 000 0000",
       plan,
     });
     toast.success(fmt(d.members.added, { name: name.trim(), class: L(CLASSES.find((c) => c.id === m.classId)!.name) }));
@@ -270,7 +270,7 @@ function AddMemberDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="mn-phone">{d.members.parentPhone}</Label>
-            <Input id="mn-phone" dir="ltr" className="text-start" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 010 0000" />
+            <Input id="mn-phone" dir="ltr" className="text-start" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+962 79 123 4567" />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { CalendarDays, CircleDollarSign, Clock, UserCheck, UserRoundX } from "lucide-react";
+import { CalendarDays, Banknote, Clock, UserCheck, UserRoundX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ATTENDANCE_WEEK, BELTS, CLASSES, COACHES, REVENUE_SERIES } from "../data";
-import { formatMonth, formatTime, formatWeekday, money, relDays } from "../format";
+import { ATTENDANCE_WEEK, BELTS, CLASSES, COACHES, REVENUE_SERIES, WEEK_DAYS } from "../data";
+import { formatMonth, formatTime, plainNumber, relDays, weekdayName } from "../format";
 import { fmt } from "../i18n";
 import { useDemo } from "../state";
-import { BarChart, Ltr, MemberAvatar, PageHeader, ProgressBar, StatCard } from "../components/bits";
+import { BarChart, Ltr, MemberAvatar, Money, PageHeader, ProgressBar, StatCard } from "../components/bits";
 import { BeltChip } from "../components/belt";
 
 export function DashboardPage() {
@@ -30,7 +30,7 @@ export function DashboardPage() {
     value: i === REVENUE_SERIES.length - 1 ? revenueThisMonth : v,
   }));
   const weekData = ATTENDANCE_WEEK.map((v, i) => ({
-    label: formatWeekday(now, 6 - i, lang),
+    label: weekdayName(WEEK_DAYS[i], lang),
     value: v,
   }));
 
@@ -71,10 +71,10 @@ export function DashboardPage() {
           sub={d.dash.expiringSub}
         />
         <StatCard
-          icon={CircleDollarSign}
+          icon={Banknote}
           tone="good"
           label={d.dash.revenue}
-          value={<Ltr>{money(revenueThisMonth)}</Ltr>}
+          value={<Money n={revenueThisMonth} />}
           sub={<Ltr>{`+${growth}%`}</Ltr>}
         />
       </div>
@@ -167,10 +167,12 @@ export function DashboardPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>{d.dash.revenueTitle}</CardTitle>
+            <CardTitle>
+              {d.dash.revenueTitle} ({d.common.currency})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <BarChart data={revenueData} format={money} height={190} />
+            <BarChart data={revenueData} format={plainNumber} height={190} />
           </CardContent>
         </Card>
         <Card>

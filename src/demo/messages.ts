@@ -1,6 +1,6 @@
 import { BELTS, CLASSES, CLUB, type Lang, type Member } from "./data";
 import { dictionaries, fmt } from "./i18n";
-import { relDays } from "./format";
+import { money, relDays } from "./format";
 
 export type WaKind = "welcome" | "arrival" | "promotion" | "reminder" | "receipt";
 
@@ -46,10 +46,10 @@ export function messageLines(msg: WaMessage, member: Member, lang: Lang): string
     case "reminder":
       return fmt((msg.days ?? 0) < 0 ? d.reminderLate : d.reminder, {
         name,
-        amount: msg.amount ?? 0,
+        amount: money(msg.amount ?? 0, lang),
         when: relDays(msg.days ?? 0, lang),
       }).split("\n");
     case "receipt":
-      return fmt(d.receipt, { name, amount: msg.amount ?? 0 }).split("\n");
+      return fmt(d.receipt, { name, amount: money(msg.amount ?? 0, lang) }).split("\n");
   }
 }

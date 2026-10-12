@@ -2,8 +2,14 @@ import type { Lang } from "./data";
 
 const DAY = 86_400_000;
 
-export function money(n: number) {
-  return `$${n.toLocaleString("en-US")}`;
+/** Jordanian dinar: "30 د.أ" in Arabic, "JD 30" in English. Western digits always. */
+export function money(n: number, lang: Lang) {
+  const v = n.toLocaleString("en-US");
+  return lang === "ar" ? `${v} د.أ` : `JD ${v}`;
+}
+
+export function plainNumber(n: number) {
+  return n.toLocaleString("en-US");
 }
 
 export function pct(n: number) {
@@ -77,4 +83,11 @@ export function formatDay(now: Date, daysAgo: number, lang: Lang) {
     month: "short",
     timeZone: "UTC",
   }).format(dateOffset(now, daysAgo));
+}
+
+/** Short weekday name for a fixed weekday (0 = Sunday ... 6 = Saturday), independent of today's date. */
+export function weekdayName(day: number, lang: Lang) {
+  // 2024-01-07 was a Sunday.
+  const d = new Date(Date.UTC(2024, 0, 7 + day));
+  return new Intl.DateTimeFormat(intlLocale(lang), { weekday: "short", timeZone: "UTC" }).format(d);
 }
