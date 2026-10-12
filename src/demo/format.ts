@@ -18,7 +18,8 @@ export function pct(n: number) {
 
 function intlLocale(lang: Lang) {
   // "nu-latn" keeps Western digits (0-9) in Arabic text, always.
-  return lang === "ar" ? "ar-EG-u-nu-latn" : "en-US";
+  // ar-JO uses the Levantine month names Jordanians actually say (آب, أيلول, تشرين الأول).
+  return lang === "ar" ? "ar-JO-u-nu-latn" : "en-US";
 }
 
 export function dateOffset(now: Date, daysAgo: number) {
@@ -42,8 +43,15 @@ export function formatMonthYear(now: Date, daysAgo: number, lang: Lang) {
   }).format(dateOffset(now, daysAgo));
 }
 
+const AR_MONTHS_SHORT = [
+  "كانون 2", "شباط", "آذار", "نيسان", "أيار", "حزيران",
+  "تموز", "آب", "أيلول", "تشرين 1", "تشرين 2", "كانون 1",
+];
+
+/** Short month label for chart axes. */
 export function formatMonth(now: Date, monthsAgo: number, lang: Lang) {
   const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1));
+  if (lang === "ar") return AR_MONTHS_SHORT[d.getUTCMonth()];
   return new Intl.DateTimeFormat(intlLocale(lang), { month: "short", timeZone: "UTC" }).format(d);
 }
 

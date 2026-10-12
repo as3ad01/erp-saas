@@ -300,6 +300,7 @@ export function initialPresent(): Record<string, string[]> {
       .filter((m, idx) => {
         if (c.status === "upcoming") return false;
         if (m.id === "m1") return false; // Omar is checked in live during the pitch.
+        if (m.expiresInDays < 0) return false; // an expired member is never seeded as present
         if (c.status === "live") return idx % 5 < 3;
         return hash(Number(m.id.slice(1)), 21) % 100 < Math.min(95, m.attendance + 8);
       })

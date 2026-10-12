@@ -62,8 +62,8 @@ export function BeltsPage() {
                 <div className="flex items-center gap-3">
                   <MemberAvatar id={m.id} name={m.name} size="lg" />
                   <div className="min-w-0">
-                    <p className="truncate font-semibold">{L(m.name)}</p>
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="leading-snug font-semibold break-words">{L(m.name)}</p>
+                    <p className="text-xs text-muted-foreground">
                       {fmt(d.common.yrs, { n: m.age })} · {L(CLASSES.find((c) => c.id === m.classId)!.name)}
                     </p>
                   </div>
@@ -105,7 +105,7 @@ export function BeltsPage() {
             <div key={m.id} className="flex items-center gap-3">
               <MemberAvatar id={m.id} name={m.name} size="sm" />
               <div className="min-w-0 flex-1">
-                <Link href={`/demo/members/${m.id}`} className="block truncate text-sm font-medium hover:underline">
+                <Link href={`/demo/members/${m.id}`} className="block text-sm font-medium hover:underline">
                   {L(m.name)}
                 </Link>
                 <p className="truncate text-xs text-muted-foreground">

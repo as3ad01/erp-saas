@@ -18,7 +18,8 @@ export function BeltGraphic({ belt, className }: { belt: number; className?: str
   const color = BELTS[belt].color;
   const dark = shade(color, -38);
   const darker = shade(color, -70);
-  const edge = belt === 0 ? "#d6d3d1" : "transparent";
+  // White and black belts need an outline to stay visible in both light and dark mode.
+  const edge = belt === 0 ? "#d6d3d1" : belt === BELTS.length - 1 ? "#78716c" : "transparent";
   return (
     <svg viewBox="0 0 120 48" className={cn("h-12 w-[120px]", className)} aria-hidden>
       {/* tails */}
@@ -45,7 +46,7 @@ export function BeltChip({ belt, className }: { belt: number; className?: string
       )}
     >
       <span
-        className="size-3 shrink-0 rounded-full ring-1 ring-black/20"
+        className="size-3 shrink-0 rounded-full ring-1 ring-foreground/30"
         style={{ backgroundColor: b.color }}
       />
       {L(b.name)}
@@ -56,7 +57,7 @@ export function BeltChip({ belt, className }: { belt: number; className?: string
 export function BeltDot({ belt, className }: { belt: number; className?: string }) {
   return (
     <span
-      className={cn("inline-block size-3 shrink-0 rounded-full ring-1 ring-black/20", className)}
+      className={cn("inline-block size-3 shrink-0 rounded-full ring-1 ring-foreground/30", className)}
       style={{ backgroundColor: BELTS[belt].color }}
     />
   );

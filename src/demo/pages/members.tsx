@@ -141,7 +141,11 @@ export function MembersPage() {
     <div>
       <PageHeader
         title={d.members.title}
-        subtitle={fmt(d.members.subtitle, { n: members.length })}
+        subtitle={
+          rows.length === members.length
+            ? fmt(d.members.subtitle, { n: members.length })
+            : fmt(d.members.subtitleFiltered, { n: rows.length, total: members.length })
+        }
         actions={
           <Button onClick={() => setAdding(true)}>
             <Plus />
@@ -268,7 +272,7 @@ export function MembersPage() {
                         <div className="min-w-0">
                           <Link
                             href={`/demo/members/${m.id}`}
-                            className="block truncate font-medium hover:underline"
+                            className="block font-medium hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {L(m.name)}
@@ -308,8 +312,8 @@ export function MembersPage() {
                 <Card size="sm" className="mb-2 flex-row items-center gap-3 px-3">
                   <MemberAvatar id={m.id} name={m.name} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{L(m.name)}</p>
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="leading-snug font-medium break-words">{L(m.name)}</p>
+                    <p className="text-xs text-muted-foreground">
                       {L(CLASSES.find((c) => c.id === m.classId)!.name)} · {m.attendance}%
                     </p>
                   </div>

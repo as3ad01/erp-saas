@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Award, CalendarCheck, CheckCheck, Medal as MedalIcon, MessageCircle, Phone, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -24,10 +25,12 @@ import { isEligible, subStatus } from "../logic";
 import { useDemo } from "../state";
 import { BeltChip, BeltGraphic } from "../components/belt";
 import { InlineLock, Ltr, MedalChip, MemberAvatar, Money, StatusBadge } from "../components/bits";
+import { ExpiredCheckInDialog } from "../components/expired-dialog";
 
 export function ProfilePage({ id }: { id: string }) {
   const { d, L, lang, dir, now, memberById, parentById, can, present, checkIn, undoCheckIn } = useDemo();
   const m = memberById(id);
+  const [confirming, setConfirming] = useState(false);
   const Back = dir === "rtl" ? ArrowRight : ArrowLeft;
 
   if (!m) {
@@ -49,6 +52,11 @@ export function ProfilePage({ id }: { id: string }) {
   const medals = COMP_RESULTS.filter((r) => r.memberId === m.id);
   const eligible = isEligible(m);
   const sessions = Math.round((m.attendance / 100) * 12);
+
+  function doCheckIn() {
+    checkIn(m!.id);
+    toast.success(fmt(can("parent") ? d.checkin.toastWa : d.checkin.toast, { name: L(m!.name) }));
+  }
 
   return (
     <div>
@@ -94,9 +102,10 @@ export function ProfilePage({ id }: { id: string }) {
                 if (here) {
                   undoCheckIn(m.id);
                   toast(fmt(d.checkin.undone, { name: L(m.name) }));
+                } else if (m.expiresInDays < 0) {
+                  setConfirming(true);
                 } else {
-                  checkIn(m.id);
-                  toast.success(fmt(can("parent") ? d.checkin.toastWa : d.checkin.toast, { name: L(m.name) }));
+                  doCheckIn();
                 }
               }}
             >
@@ -126,7 +135,9 @@ export function ProfilePage({ id }: { id: string }) {
         <Mini
           icon={Wallet}
           label={d.profile.subscription}
-          value={relDays(m.expiresInDays, lang)}
+          value={fmt(m.expiresInDays < 0 ? d.profile.expiredWhen : d.profile.renews, {
+            when: relDays(m.expiresInDays, lang),
+          })}
           sub={`${d.plan[m.plan]} · ${money(PLAN_PRICE[m.plan], lang)}`}
           warn={m.expiresInDays <= 7}
         />
@@ -138,7 +149,7 @@ export function ProfilePage({ id }: { id: string }) {
       </div>
 
       <Tabs defaultValue={can("belts") ? "belts" : "attendance"}>
-        <TabsList className="h-auto w-full flex-wrap justify-start sm:w-fit">
+        <TabsList className="grid h-auto! w-full grid-cols-2 gap-1 sm:inline-flex sm:h-8! sm:w-fit">
           <TabsTrigger value="belts" className="px-3 py-1.5">{d.profile.tabBelts}</TabsTrigger>
           <TabsTrigger value="attendance" className="px-3 py-1.5">{d.profile.tabAttendance}</TabsTrigger>
           <TabsTrigger value="payments" className="px-3 py-1.5">{d.profile.tabPayments}</TabsTrigger>
@@ -280,6 +291,15 @@ export function ProfilePage({ id }: { id: string }) {
           )}
         </TabsContent>
       </Tabs>
+
+      <ExpiredCheckInDialog
+        member={confirming ? m : null}
+        onCancel={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          doCheckIn();
+        }}
+      />
     </div>
   );
 }
@@ -309,9 +329,9 @@ function Mini({
           <Icon className="size-4" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-xs text-muted-foreground">{label}</p>
-          <p className="truncate text-lg font-bold tabular-nums">{value}</p>
-          {sub && <p className="truncate text-[11px] text-muted-foreground">{sub}</p>}
+          <p className="text-xs leading-tight text-muted-foreground">{label}</p>
+          <p className="text-lg leading-tight font-bold tabular-nums">{value}</p>
+          {sub && <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{sub}</p>}
         </div>
       </CardContent>
     </Card>

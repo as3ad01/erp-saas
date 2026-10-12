@@ -210,7 +210,7 @@ export function Topbar() {
         <div className="flex min-w-0 items-center gap-2">
           <MobileNav />
           <Logo className="size-7 md:hidden" />
-          <span className="truncate text-sm font-semibold md:hidden">{L(CLUB.name)}</span>
+          <span className="hidden truncate text-sm font-semibold sm:inline md:hidden">{L(CLUB.name)}</span>
           <PackageSwitcher className="hidden md:flex" />
           <Badge variant="secondary" className="hidden lg:inline-flex">
             {d.app.demo}
